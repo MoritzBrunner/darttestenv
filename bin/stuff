@@ -1,0 +1,544 @@
+import 'dart:collection';
+import 'dart:io';
+
+/// Date version
+/// name:
+/// - DTN in date format when given a date
+///
+/// ever page without date has the marker belongTo: Date
+
+// next: a way for all anchors to sort it self
+void main() {
+  List<Anchor2> allAnchors = [];
+
+  while (true) {
+    print('command:');
+    var command = stdin.readLineSync();
+
+    if (command == 'ls') {
+      listAnchors(allAnchors);
+    }
+
+    if (command == 'sort') {
+      allAnchors = srt(allAnchors);
+    }
+
+    if (command == 'shuffle') {
+      allAnchors.shuffle();
+    }
+
+    if (command == 'add') {
+      allAnchors
+          .add(Anchor2([], DateTime.now().millisecondsSinceEpoch, [], []));
+    }
+
+    if (command == 'link') {
+      print('Anchor index:');
+      var anchorIndex = int.parse(stdin.readLineSync() ?? '0');
+      var anchor = allAnchors[anchorIndex];
+      print('Link to which Anchor:');
+      var holdingGroundIndex = int.parse(stdin.readLineSync() ?? '0');
+      var holdingGround = allAnchors[holdingGroundIndex];
+      anchor.linkTo(holdingGround);
+    }
+    if (command == 'del') {
+      print('Anchor index:');
+      var anchorIndex = int.parse(stdin.readLineSync() ?? '0');
+      allAnchors.removeAt(anchorIndex);
+    }
+    if (command == 'q') {
+      break;
+    }
+  }
+}
+
+class Anchor {
+  final int name = DateTime.now().millisecondsSinceEpoch;
+  final List<int> linkList = [];
+  int? timeOfLink;
+  final List<int> belowMe = [];
+  Anchor();
+
+  linkTo(Anchor otherAnchor) {
+    linkList.clear();
+    linkList.addAll(otherAnchor.linkList + [otherAnchor.name]);
+    timeOfLink = DateTime.now().millisecondsSinceEpoch;
+  }
+}
+
+listAnchors(List<Anchor2> allAnchors) {
+  var c = 0;
+  for (var anchor in allAnchors) {
+    print(
+        '$c - ${anchor.place}:${anchor.name}:${anchor.linkedTo}:${anchor.attached}');
+    c++;
+  }
+}
+
+List<Anchor> sortAllAnchors(List<Anchor> allAnchors) {
+  var linkList = 'll';
+  var timeOfLink = 'tof';
+  var belowMe = 'bm';
+
+  /// a map of all Anchors
+  /// in that we set belowMe's (afterwards we can resolve by the belowMe's)
+  var allMap = {
+    for (var a in allAnchors)
+      a.name: {
+        linkList: a.linkList,
+        timeOfLink: a.timeOfLink,
+        belowMe: a.belowMe
+      }
+  };
+
+  /// going through all anchors as a list to not modify allMap while itterating through it
+  /// there is no performance difference because we need to go through all anyways
+  for (var b in allAnchors) {
+    var res = some(allMap, b.linkList);
+    if (res == 0) {}
+  }
+
+  return [];
+}
+
+/// returns first found key in link list
+/// or 0 when no link is found
+/// or -1 if linklist is empty
+some(Map map, List<int> ll) {
+  if (ll.isNotEmpty) {
+    var length = ll.length;
+
+    while (true) {
+      var step = 0;
+      var index = length - step;
+      var fixp = ll[index];
+
+      if (map.containsKey(fixp)) {
+        return fixp;
+      } else {
+        if (index >= 0) return 0; // use prime as place
+        step++;
+      }
+    }
+  } else {
+    return -1; // use name as place
+  }
+}
+//List<Anchor> sortAllAnchors(List<Anchor> allAnchors) {
+//allAnchors.sort((a,b){
+//    var x = a.pointer.compareTo(b.pointer);
+//    return x == 0 ? a.sub.compareTo(b.sub) : x;
+//});
+// var orderedList = [];
+// orderedList
+//     .addAll(allAnchors.where((element) => element.linkList.isEmpty).toList());
+// orderedList.sort((a, b) => a.name.compareTo(b.name));
+// var anchorsWithLinkList = [];
+// anchorsWithLinkList.addAll(
+//     allAnchors.where((element) => element.linkList.isNotEmpty).toList());
+
+//var orderedList = <Anchor>[];
+//orderedList.addAll(allAnchors.where((element) => element.linkList.isEmpty));
+//orderedList.sort((a, b) => a.name.compareTo(b.name));
+//
+//var some = <Anchor>[];
+//some.addAll(allAnchors.where((element) => element.linkList.length == 1));
+//some.sort((a, b) => b.timeOfLink!.compareTo(a.timeOfLink!)); // why no work
+//for (var a in some) {
+//  var index =
+//      orderedList.indexWhere((element) => element.name == a.linkList[0]);
+//  if (index == -1) {}
+//  orderedList.insert(index + 1, a);
+//}
+//
+//return orderedList;
+//}
+
+/// instead of 1,2,3 use Datetime now
+/// with this it follows the chain but if there is a conflict DTN determines which is top
+/// JustFUCING TRY IT REly
+///
+///
+/// if linklist is empty
+/// sort by time
+///
+/// get last in link list
+/// find that in list
+/// if its not there move on to the one below aso..
+/// get the index of the found
+/// insert at the index below
+///
+/// if the one below also ends with the same address let time of movement decide
+///
+///
+///
+///
+/// if link list is empty order by name
+/// find the ones with 1 address in link list and order them to the list
+/// find the ones with 2 addreses in link list and order them ro the list
+/// aso...
+///
+///
+///
+
+///
+///
+/// Anchor
+/// Address:
+/// - if linkList is empty => address
+/// - the place of this anchor is below the first present anchor
+///   address in the linkList
+/// - if non of the anchor addresses in the linkList are present => prime
+///
+/// Key: (in File)
+/// - UniqueKey given when created, it never changes
+///   (if th anchor mangages the vicinity it does not need unique key, but it
+///   makes things more simple, no renaming and stuff)
+///
+/// TimeStamp: (in File)
+/// - DTNms when given a Date
+///   (it does not have to be "Date" other things clould also be the anchor but
+///   date seems fiting as it occurs regularly and pages are bundled by it)
+/// - it gets overwritten when it is moved/linked, DTNms of movement
+///   (this way it is "gone" when it is moved to an other place, in other words
+///   it does not drag all things that think they are below it with it)
+///   (removal to external database and readd are not a problem because those
+///   dont change the name, only moving in app does)
+///   (problem: what is if you make a backup but keep all of it in the app, now
+///   you want to readd things form the backup (why but ok), this would lead to
+///   duplicates since the original name is not recoginized, but if it is moved
+///   it is not the same anymore anyways)
+/// - the timeStamp determines the address of this anchor if linkedTo is empty
+///
+/// LinkedTo: (in File)
+/// - is set when page is linked, copied form the anchor it is linked to + that
+///   anchors name at the end
+///   (this is called chaining and alows the anchor to find its place even if
+///   the thing it is linked to is removed or moved)
+/// - the place of this anchor is below the first present anchor adress in the
+///   linkList
+///
+/// prime:
+/// - the first anchor in the linkList
+/// - if non of the anchor addresses in the linkedTo are present it determines
+///   the address of this anchor
+///
+/// Attached:
+/// - the addresses of other anchors that have this anchor first present in
+///   their linkList
+/// - if this list contains multiple anchor adresses all of these will be below
+///   this anchor ordered by name (highest first) (all that comes with it will
+///   be before the next highest address)
+///
+/// Vicinity: (in File)
+/// - a list that holds the unique keys of the vicinity
+/// - moving things in or into changes the list
+/// - it self is on that list
+/// (every page gets a unique key when created)
+///
+///
+///
+///
+/// Sorting Algorithm
+///
+///
+///
+
+class Anchor2 {
+  //final String key; // all pages need keys if they are going to be in vicinity so anchor also gets one
+  List<int> place =
+      []; // this is a list because if map is mixed it doesnt let you access stuff with the correct type
+
+  int name = 0;
+  List<int> linkedTo = [];
+
+  List<int> attached = [];
+
+  //List<String> vicinity = [];
+  Anchor2(this.place, this.name, this.linkedTo, this.attached);
+
+  linkTo(Anchor2 otherAnchor) {
+    linkedTo.clear();
+    linkedTo.addAll(otherAnchor.linkedTo + [otherAnchor.name]);
+    name = DateTime.now().millisecondsSinceEpoch;
+    // it gets moved so all refering to them would be wrong therfore it changes so that the others point to empty and use the next
+  }
+}
+
+srt(List<Anchor2> allAnchors) {
+  /// a map of all Anchors
+  /// in that we set belowMe's (afterwards we can resolve by the belowMe's)
+  var map = {
+    for (var a in allAnchors) a.name: [a.place, a.linkedTo, a.attached]
+  }; // linked 2 ois needed to create Anchor2 instance later on
+
+  // now we need to attach
+  for (var anchor in allAnchors) {
+    if (anchor.linkedTo.isNotEmpty) {
+      var length = anchor.linkedTo.length;
+
+      while (true) {
+        var step = 0;
+        var index = length - step - 1;
+        var otherAnchorName = anchor.linkedTo[index];
+
+        if (map.containsKey(otherAnchorName)) {
+          map[otherAnchorName]![2].add(anchor.name);
+          // place for this anchor is left empty
+          break;
+        } else {
+          if (index >= 0) {
+            var prime = anchor.linkedTo.first;
+            map[anchor.name]?[0] = [prime];
+            break;
+          }
+          step++;
+        }
+      }
+    } else {
+      map[anchor.name]?[0] = [anchor.name];
+    }
+  }
+
+  List<Anchor2> sortedList = [];
+
+  // starting with the ones with places
+  for (var a in map.entries) {
+    if (a.value[0].isNotEmpty) {
+      sortedList.add(Anchor2(a.value[0], a.key, a.value[1], a.value[2]));
+    }
+  }
+
+  sortedList.sort((a, b) => a.place[0].compareTo(b.place[0]));
+
+  // now fill up with fillowing belowme
+  List<Anchor2> sortedList2 = [];
+
+  for (var a in sortedList) {
+    sortedList2.add(a);
+    List<Anchor2> pooplist = [];
+    sortedList2.addAll(n(map, a.name, pooplist));
+  }
+
+  return sortedList2;
+}
+
+n(Map map, int name, List<Anchor2> l) {
+  if (map[name]![2].isEmpty) return l;
+  for (var d in map[name]![2]) {
+    l.add(Anchor2([], d, map[d]![1], map[d]![2]));
+    return n(map, d, l);
+  }
+}
+
+///
+/// ----------------------------------
+///
+
+class Anch extends LinkedListEntry<Anch> {
+  int name = DateTime.now().millisecondsSinceEpoch;
+  List<Anch> linkedTo = [];
+
+  void linkTo(Anch otherAnchor) {
+    name = DateTime.now().millisecondsSinceEpoch;
+    linkedTo = otherAnchor.linkedTo + [otherAnchor];
+  }
+
+  Anch get prime => linkedTo.first;
+
+  // factory Anch.formFile
+}
+
+Map<int, List<int>> attachMap(List<Anch> list) {
+  return {for (var anchor in list) anchor.name: []};
+}
+
+HashMap<Anch, List<Anch>> attachmentHashMapA(List<Anch> list) {
+  var hMap = HashMap<Anch, List<Anch>>();
+  for (var anchor in list) {
+    hMap[anchor] = [];
+  }
+  return hMap;
+}
+
+HashMap<int, Anch> nameHashMap(List<Anch> list) {
+  var hMap = HashMap<int, Anch>();
+  for (var anchor in list) {
+    hMap[anchor.name] = anchor;
+  }
+  return hMap;
+}
+
+List soat(List<Anch> allAnchors) {
+  var sortedAnchors = <Anch>[];
+  var a = [];
+  var b = {};
+  var c = <Anch>{};
+  var d = HashMap();
+  var f = SplayTreeSet<Anch>((a, b) => 1);
+  var g = Set();
+  var h = Set();
+
+  var anywaysSortedList = []; // not if primes are used
+  var aMap = attachMap(allAnchors);
+  var hnMap = nameHashMap(allAnchors);
+
+  var stm = SplayTreeMap<int, Anch>();
+  var attachmentRegister = attachmentHashMap(allAnchors);
+  for (var anchor in allAnchors) {
+    // get the ones without link because they need to be seperated in a later step (they are like seed cristals)
+    if (anchor.linkedTo.isEmpty) {
+      // this str sorts the element by key automaticaly, it also has some useles functions
+      stm[anchor.name] = anchor;
+    } else {
+      // here we let anchors now that they have an attachment (or multiple)
+      // by going down the linked to list of anchor back to front and search
+      // for the first available anchor it is linked to
+      for (var i = anchor.linkedTo.length; i <= 0; i--) {
+        if (attachmentRegister.containsKey(anchor.linkedTo[i])) {
+          attachmentRegister[anchor.linkedTo[i]]!.add(anchor);
+          break;
+        }
+        // if the break didnt happen the anchor uses its prime as placement
+        if (i == 0) stm[anchor.prime.name] = anchor;
+      }
+    }
+  }
+
+  /// stm
+  /// {
+  ///   1: AnchA
+  ///   2: AnchB
+  ///   3: AnchF
+  /// }
+
+  /// ahm
+  /// AnchA:[AnchC]
+  /// AnchB:[AnchX]
+  /// AnchC:[AnchE]
+  /// AnchD:[AnchY, AnchZ]
+  /// AnchE:[]
+  /// AnchF:[AnchD]
+  ///
+
+  var coolList = <Anch>[];
+
+  for (var a in stm.values) {
+    var chain = knotAChainA(attachmentRegister, <Anch>[a]);
+    // [A, C, E]
+    // [B, X, ..]
+    // [F, D, Y, .., Z, ..]
+    coolList.addAll(chain);
+  }
+
+  return coolList;
+  // [A, C, E, B, X, .., F, D, Y, .., Z, ..]
+}
+
+List<Anch> knotAChainA(
+    HashMap<Anch, List<Anch>> attachmentRegister, List<Anch> chain) {
+  if (attachmentRegister[chain.last]!.isEmpty) return chain;
+  for (var link in attachmentRegister[chain.last]!
+    ..sort((linkA, linkB) => linkA.name.compareTo(linkB.name))) {
+    chain.add(link);
+    knotAChainA(attachmentRegister, chain);
+  }
+  return chain;
+}
+
+List<Anch> knotAChainB(
+  HashMap<Anch, List<Anch>> attachmentRegister,
+  Anch a,
+  List<Anch> chain,
+) {
+  var links = attachmentRegister[
+      a]!; // [C], AnchA:[AnchC] // [E], AnchC:[AnchE] // [], AnchE:[]
+  if (links.isEmpty) {
+    return chain;
+  } else if (links.length == 1) {
+    var link = links.first; // C // E
+    //chain.addAll([link] + knotAChain(attachmentRegister, link, chain));
+  } else {
+    links.sort((x, y) => x.name.compareTo(y.name));
+    for (var link in links) {
+      //chain.addAll(knotAChain(attachmentRegister, link, chain));
+    }
+  }
+  return chain;
+}
+
+hjkoi(allAnchors, sortedAnchors) {
+  allAnchors.removeWhere((element) {
+    var isNotLinked = element.linkedTo.isEmpty;
+    if (isNotLinked) sortedAnchors.add(element);
+    return isNotLinked;
+  });
+
+  allAnchors.retainWhere((element) => false);
+
+  return [];
+}
+
+///
+/// for all
+/// 3 possibilities
+/// - empty linkedTo > move to list
+/// - linkedTo anchor present > let the one that holds you know
+/// - linkedTo anchor absent > move to list
+///
+/// sort the list
+/// for each in list
+///
+///
+///
+
+HashMap<Anch, List<Anch>> attachmentHashMap(List<Anch> list) {
+  var hMap = HashMap<Anch, List<Anch>>();
+  for (var anchor in list) {
+    hMap[anchor] = [];
+  }
+  return hMap;
+}
+
+List sort(List<Anch> allAnchors) {
+  var groundedAnchorsReg = SplayTreeMap<int, Anch>();
+  var attachmentRegister = attachmentHashMap(allAnchors);
+
+  for (var anchor in allAnchors) {
+    if (anchor.linkedTo.isEmpty) {
+      groundedAnchorsReg[anchor.name] = anchor;
+    } else {
+      for (var i = anchor.linkedTo.length; i <= 0; i--) {
+        if (attachmentRegister.containsKey(anchor.linkedTo[i])) {
+          attachmentRegister[anchor.linkedTo[i]]!.add(anchor);
+          break;
+        }
+        if (i == 0) groundedAnchorsReg[anchor.prime.name] = anchor;
+      }
+    }
+  }
+
+  var coolList = <Anch>[];
+
+  for (var a in groundedAnchorsReg.values) {
+    var chain = knotAChain(attachmentRegister, <Anch>[a]);
+    // [A, C, E]
+    // [B, X, ..]
+    // [F, D, Y, .., Z, ..]
+    coolList.addAll(chain);
+  }
+
+  return coolList;
+  // [A, C, E, B, X, .., F, D, Y, .., Z, ..]
+}
+
+List<Anch> knotAChain(
+    HashMap<Anch, List<Anch>> attachmentRegister, List<Anch> chain) {
+  if (attachmentRegister[chain.last]!.isEmpty) return chain;
+  for (var link in attachmentRegister[chain.last]!
+    ..sort((linkA, linkB) => linkA.name.compareTo(linkB.name))) {
+    chain.add(link);
+    knotAChain(attachmentRegister, chain);
+  }
+  return chain;
+}
