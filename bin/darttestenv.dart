@@ -22,42 +22,45 @@ class TestObject with Anchor {
   }
 
   void save() {
-    File(dir.path + '/' + entryFileName).writeAsString(text);
+    File(dir.path + '/' + entryFileName)
+      ..create()
+      ..writeAsString(text);
     anchorToDir(dir);
   }
 }
 
-List<TestObject> crateListOfObjects(Directory testDir) {
-  var allObjects = <TestObject>[];
-  for (var dir in testDir.listSync().whereType<Directory>()) {
-    allObjects.add(TestObject.formDir(dir));
-  }
-  return allObjects;
-}
-
-void listAllObjects(List<TestObject> allObjects) {
-  var count = 0;
-  for (var obj in allObjects) {
-    var index = count < 10 ? '0$count' : '$count';
-    print('$index - ${obj.dirName}: ${obj.text} - ${obj.anchor}');
-    count++;
-  }
-}
-
 void main() {
-  if (!Directory('test/test_dir').existsSync()) {
-    Directory('test/test_dir').createSync(recursive: true);
-    print('created Directory');
+  const test_dir_1 = 'test/test_dir_1';
+  const test_dir_2 = 'test/test_dir_2';
+
+  if (!Directory(test_dir_1).existsSync()) {
+    Directory(test_dir_1).createSync(recursive: true);
+    print('created Directory test_dir_1');
   }
+  if (!Directory(test_dir_2).existsSync()) {
+    Directory(test_dir_2).createSync(recursive: true);
+    print('created Directory test_dir_2');
+  }
+
+  var workingDirectory = test_dir_1;
+
   var allObjects = <TestObject>[];
 
   while (true) {
     print('command:');
     var command = stdin.readLineSync();
 
+    if (command == 'cl') {
+      allObjects = crateListOfObjects(Directory(workingDirectory));
+    }
+
+    if (command == 'ls') {
+      listAllObjects(allObjects);
+    }
+
     if (command == 'add') {
-      var newObj =
-          TestObject(Directory('test/test_dir/page_${allObjects.length}'));
+      var newPath = workingDirectory + '/page_${allObjects.length}';
+      var newObj = TestObject(Directory(newPath));
       allObjects.add(newObj);
       newObj.save();
     }
@@ -66,29 +69,14 @@ void main() {
       print('how many:');
       var amount = int.parse(stdin.readLineSync() ?? '0');
       for (var i = 0; i < amount; i++) {
-        var newObj =
-            TestObject(Directory('test/test_dir/page_${allObjects.length}'));
+        var newPath = workingDirectory + '/page_${allObjects.length}';
+        var newObj = TestObject(Directory(newPath));
         allObjects.add(newObj);
         newObj.save();
         sleep(Duration(milliseconds: 33));
       }
     }
 
-    if (command == 'cl') {
-      allObjects = crateListOfObjects(Directory('test/test_dir'));
-    }
-
-    if (command == 'ls') {
-      listAllObjects(allObjects);
-    }
-
-    if (command == 'edit') {
-      print('Object index:');
-      var objectIndex = int.parse(stdin.readLineSync() ?? '0');
-      var object = allObjects[objectIndex];
-      object.text = stdin.readLineSync() ?? 'empty';
-      object.save();
-    }
     if (command == 'sort') {
       var s = Stopwatch()..start();
       AnchorSort<TestObject>()(allObjects);
@@ -97,6 +85,14 @@ void main() {
 
     if (command == 'shuffle') {
       allObjects.shuffle();
+    }
+
+    if (command == 'edit') {
+      print('Object index:');
+      var objectIndex = int.parse(stdin.readLineSync() ?? '0');
+      var object = allObjects[objectIndex];
+      object.text = stdin.readLineSync() ?? 'empty';
+      object.save();
     }
 
     if (command == 'link') {
@@ -118,5 +114,22 @@ void main() {
     if (command == 'q') {
       break;
     }
+  }
+}
+
+List<TestObject> crateListOfObjects(Directory testDir) {
+  var allObjects = <TestObject>[];
+  for (var dir in testDir.listSync().whereType<Directory>()) {
+    allObjects.add(TestObject.formDir(dir));
+  }
+  return allObjects;
+}
+
+void listAllObjects(List<TestObject> allObjects) {
+  var count = 0;
+  for (var obj in allObjects) {
+    var index = count < 10 ? '0$count' : '$count';
+    print('$index - ${obj.dirName}: ${obj.text} - ${obj.anchor}');
+    count++;
   }
 }
