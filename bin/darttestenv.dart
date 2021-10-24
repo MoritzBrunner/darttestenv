@@ -1,76 +1,122 @@
 import 'dart:io';
-import 'dart:math';
 
-import 'package:darttestenv/darttestenv.dart';
+import 'package:darttestenv/anchor_sort.dart';
+
+extension Name on FileSystemEntity {
+  String get name {
+    return path.split('/').last.split(r'\').last;
+  }
+}
+
+class TestObject with Anchor {
+  static const String entryFileName = 'entry.txt';
+  final Directory dir;
+  String text = 'empty';
+  TestObject(this.dir);
+
+  String get dirName => dir.name;
+
+  TestObject.formDir(this.dir) {
+    text = File(dir.path + '/' + entryFileName).readAsStringSync();
+    anchorFromDir(dir);
+  }
+
+  void save() {
+    File(dir.path + '/' + entryFileName).writeAsString(text);
+    anchorToDir(dir);
+  }
+}
+
+List<TestObject> crateListOfObjects(Directory testDir) {
+  var allObjects = <TestObject>[];
+  for (var dir in testDir.listSync().whereType<Directory>()) {
+    allObjects.add(TestObject.formDir(dir));
+  }
+  return allObjects;
+}
+
+void listAllObjects(List<TestObject> allObjects) {
+  var count = 0;
+  for (var obj in allObjects) {
+    var index = count < 10 ? '0$count' : '$count';
+    print('$index - ${obj.dirName}: ${obj.text} - ${obj.anchor}');
+    count++;
+  }
+}
 
 void main() {
-  List<Anchor> allAnchors = [];
+  if (!Directory('test/test_dir').existsSync()) {
+    Directory('test/test_dir').createSync(recursive: true);
+    print('created Directory');
+  }
+  var allObjects = <TestObject>[];
 
   while (true) {
     print('command:');
     var command = stdin.readLineSync();
 
-    if (command == 'ls') {
-      listAnchors(allAnchors);
-    }
-
-    if (command == 'sort') {
-      allAnchors = sort(allAnchors, false);
-    }
-
-    if (command == 'sortx') {
-      allAnchors = sort(allAnchors, true);
-    }
-
-    if (command == 'shuffle') {
-      allAnchors.shuffle();
-    }
-
     if (command == 'add') {
-      allAnchors.add(Anchor(Random().nextInt(1000)));
+      var newObj =
+          TestObject(Directory('test/test_dir/page_${allObjects.length}'));
+      allObjects.add(newObj);
+      newObj.save();
     }
 
     if (command == 'addd') {
-      for (var i = 0; i < 10; i++) {
-        allAnchors.add(Anchor(Random().nextInt(1000)));
-        sleep(Duration(milliseconds: 103));
+      print('how many:');
+      var amount = int.parse(stdin.readLineSync() ?? '0');
+      for (var i = 0; i < amount; i++) {
+        var newObj =
+            TestObject(Directory('test/test_dir/page_${allObjects.length}'));
+        allObjects.add(newObj);
+        newObj.save();
+        sleep(Duration(milliseconds: 33));
       }
     }
 
+    if (command == 'cl') {
+      allObjects = crateListOfObjects(Directory('test/test_dir'));
+    }
+
+    if (command == 'ls') {
+      listAllObjects(allObjects);
+    }
+
+    if (command == 'edit') {
+      print('Object index:');
+      var objectIndex = int.parse(stdin.readLineSync() ?? '0');
+      var object = allObjects[objectIndex];
+      object.text = stdin.readLineSync() ?? 'empty';
+      object.save();
+    }
+    if (command == 'sort') {
+      var s = Stopwatch()..start();
+      AnchorSort<TestObject>()(allObjects);
+      print(s.elapsedMicroseconds);
+    }
+
+    if (command == 'shuffle') {
+      allObjects.shuffle();
+    }
+
     if (command == 'link') {
-      print('Anchor index:');
-      var anchorIndex = int.parse(stdin.readLineSync() ?? '0');
-      var anchor = allAnchors[anchorIndex];
-      print('Link to which Anchor:');
-      var otherAnchorIndex = int.parse(stdin.readLineSync() ?? '0');
-      var otherAnchor = allAnchors[otherAnchorIndex];
-      anchor.linkTo(otherAnchor);
+      print('Object index:');
+      var objectIndex = int.parse(stdin.readLineSync() ?? '0');
+      var object = allObjects[objectIndex];
+      print('Link to which other Object:');
+      var otherObjectIndex = int.parse(stdin.readLineSync() ?? '0');
+      var otherAnchor = allObjects[otherObjectIndex];
+      object.linkTo(otherAnchor);
     }
 
     if (command == 'del') {
-      print('Anchor index:');
-      var anchorIndex = int.parse(stdin.readLineSync() ?? '0');
-      allAnchors.removeAt(anchorIndex);
+      print('Object index:');
+      var objectIndex = int.parse(stdin.readLineSync() ?? '0');
+      allObjects.removeAt(objectIndex);
     }
 
     if (command == 'q') {
       break;
     }
-  }
-}
-
-void listAnchors(List<Anchor> allAnchors) {
-  var c = 0;
-  for (var anchor in allAnchors) {
-    var i = c < 10 ? '0$c' : '$c';
-    var k = '${anchor.key}';
-    if (anchor.key < 10) {
-      k = '00${anchor.key}';
-    } else if (anchor.key < 100) {
-      k = '0${anchor.key}';
-    }
-    var l = '${anchor.linkedTo.map((e) => e.key).toList()}';
-    print('$i - $k:${anchor.name}:$l');
-    c++;
   }
 }
