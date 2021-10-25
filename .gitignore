@@ -6,5 +6,5 @@
 build/
 
 # test env
-*test_dir
+*test_dir*
 *.DS_Store

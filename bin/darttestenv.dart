@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:math';
 
 import 'package:darttestenv/anchor_sort.dart';
 
@@ -23,8 +24,8 @@ class TestObject with Anchor {
 
   void save() {
     File(dir.path + '/' + entryFileName)
-      ..create()
-      ..writeAsString(text);
+      ..createSync(recursive: true)
+      ..writeAsStringSync(text);
     anchorToDir(dir);
   }
 }
@@ -50,16 +51,27 @@ void main() {
     print('command:');
     var command = stdin.readLineSync();
 
+    if (command == 'dir') {
+      print('Nr.:');
+      var dir = int.parse(stdin.readLineSync() ?? '0');
+      if (dir == 2) {
+        workingDirectory = test_dir_2;
+      } else {
+        workingDirectory = test_dir_1;
+      }
+      allObjects.clear();
+    }
     if (command == 'cl') {
       allObjects = crateListOfObjects(Directory(workingDirectory));
     }
 
     if (command == 'ls') {
+      print(workingDirectory.substring(5));
       listAllObjects(allObjects);
     }
 
     if (command == 'add') {
-      var newPath = workingDirectory + '/page_${allObjects.length}';
+      var newPath = workingDirectory + '/page_${Random().nextInt(10000)}';
       var newObj = TestObject(Directory(newPath));
       allObjects.add(newObj);
       newObj.save();
@@ -69,7 +81,7 @@ void main() {
       print('how many:');
       var amount = int.parse(stdin.readLineSync() ?? '0');
       for (var i = 0; i < amount; i++) {
-        var newPath = workingDirectory + '/page_${allObjects.length}';
+        var newPath = workingDirectory + '/page_${Random().nextInt(10000)}';
         var newObj = TestObject(Directory(newPath));
         allObjects.add(newObj);
         newObj.save();

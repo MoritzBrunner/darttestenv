@@ -29,9 +29,9 @@ abstract class Anchor {
 
   void anchorToDir(Directory dir) {
     var string = anchor.toString().replaceFirst('[', '').replaceFirst(']', '');
-    var file = File(dir.path + '/' + anchorFileName)
-      ..createSync(recursive: true);
-    file.writeAsString(string);
+    File(dir.path + '/' + anchorFileName)
+      ..createSync(recursive: true)
+      ..writeAsStringSync(string);
   }
 }
 
