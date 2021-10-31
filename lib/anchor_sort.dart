@@ -10,9 +10,6 @@ import 'dart:io';
 /// You put a list of all objects (that have an anchor) into it and it spits out
 /// a sorted list of all these objects.
 
-/// an anchor consist of a list of anchor ids
-/// anchor.last = id of this anchor
-/// anchor[i] = id of an other anchor inside this anchor
 abstract class Anchor {
   static const anchorFileName = '.anchor.csv';
 
@@ -93,6 +90,10 @@ class AnchorSort<E extends Anchor> {
     return chain;
   }
 }
+
+/// an anchor consist of a list of anchor ids
+/// anchor.last = id of this anchor
+/// anchor[i] = id of an other anchor inside this anchor
 
 /// For things to get sorted in the right order the SplayTreeMaps/Sets
 /// need to order things highest first lowest last.
