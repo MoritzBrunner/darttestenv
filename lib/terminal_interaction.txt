@@ -1,0 +1,9 @@
+
+// Process.runSync('open', ['-a', 'terminal', '-n']);
+// Process.runSync('osascript', [
+//   '-e tell application "Terminal"',
+//   //'-e tell application "System Events" to keystroke "n" using {command down}',
+//   '-e set position of window 1 to {800, 1}',
+//   '-e do script "cd development"',
+//   '-e end tell',
+// ]);
