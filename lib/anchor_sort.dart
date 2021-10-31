@@ -5,10 +5,10 @@ import 'dart:io';
 /// ## Algorithm ahead! ##
 
 /// This is AnchorSort.
-/// AnchorSort allows any Object to be sorted
-
-/// you put in a list of all objects (that have an anchor) that you want to sort
-/// it spits out a sorted list of all these objects.
+/// AnchorSort allows any Object to be sorted.
+///
+/// You put a list of all objects (that have an anchor) into it and it spits out
+/// a sorted list of all these objects.
 
 /// an anchor consist of a list of anchor ids
 /// anchor.last = id of this anchor

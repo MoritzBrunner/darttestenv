@@ -21,9 +21,11 @@ extension Name on FileSystemEntity {
 
 class TestObject with Anchor {
   static const String entryFileName = 'entry.txt';
+
   final Directory dir;
-  String text = 'empty';
   TestObject(this.dir);
+
+  String text = 'empty';
 
   String get dirName => dir.name;
 
@@ -32,131 +34,156 @@ class TestObject with Anchor {
     anchorFromDir(dir);
   }
 
-  void save() {
+  void saveObj() {
     File(dir.path + '/' + entryFileName)
       ..createSync(recursive: true)
       ..writeAsStringSync(text);
+  }
+
+  void saveAnchor() {
     anchorToDir(dir);
   }
 }
 
+const test_dir_1 = 'test/test_dir_1';
+const test_dir_2 = 'test/test_dir_2';
+
+var workingDirectory = test_dir_1;
+
+var allObjects = <TestObject>[];
 void main() {
-  const test_dir_1 = 'test/test_dir_1';
-  const test_dir_2 = 'test/test_dir_2';
+  rootExists(test_dir_1);
+  rootExists(test_dir_2);
 
-  if (!Directory(test_dir_1).existsSync()) {
-    Directory(test_dir_1).createSync(recursive: true);
-    print('created Directory test_dir_1');
-  }
-  if (!Directory(test_dir_2).existsSync()) {
-    Directory(test_dir_2).createSync(recursive: true);
-    print('created Directory test_dir_2');
-  }
+  var run = true;
 
-  var workingDirectory = test_dir_1;
-
-  var allObjects = <TestObject>[];
-
-  while (true) {
+  while (run) {
     print('command:');
     var command = stdin.readLineSync();
 
-    if (command == 'open') {
-      Process.runSync('open', [
-        Directory(test_dir_1).path,
-        Directory(test_dir_2).path,
-        '-g',
-      ]);
-    }
-
-    if (command == 'dir') {
-      print('Nr.:');
-      var dir = int.parse(stdin.readLineSync() ?? '0');
-      if (dir == 2) {
-        workingDirectory = test_dir_2;
-      } else {
-        workingDirectory = test_dir_1;
-      }
-      allObjects.clear();
-    }
-
-    if (command == 'cl') {
-      allObjects = crateListOfObjects(Directory(workingDirectory));
-    }
-
-    if (command == 'ls') {
-      print(workingDirectory.substring(5));
-      listAllObjects(allObjects);
-    }
-
-    if (command == 'add') {
-      var newPath = workingDirectory + '/page_${Random().nextInt(10000)}';
-      var newObj = TestObject(Directory(newPath));
-      allObjects.add(newObj);
-      newObj.save();
-    }
-
-    if (command == 'addd') {
-      print('how many:');
-      var amount = int.parse(stdin.readLineSync() ?? '0');
-      for (var i = 0; i < amount; i++) {
-        var newPath = workingDirectory + '/page_${Random().nextInt(10000)}';
-        var newObj = TestObject(Directory(newPath));
-        allObjects.add(newObj);
-        newObj.save();
-        sleep(Duration(milliseconds: 33));
-      }
-    }
-
-    if (command == 'sort') {
-      var s = Stopwatch()..start();
-      AnchorSort<TestObject>()(allObjects);
-      print(s.elapsedMicroseconds);
-    }
-
-    if (command == 'shuffle') {
-      allObjects.shuffle();
-    }
-
-    if (command == 'edit') {
-      print('Object index:');
-      var objectIndex = int.parse(stdin.readLineSync() ?? '0');
-      var object = allObjects[objectIndex];
-      object.text = stdin.readLineSync() ?? 'empty';
-      object.save();
-    }
-
-    if (command == 'link') {
-      print('Object index:');
-      var objectIndex = int.parse(stdin.readLineSync() ?? '0');
-      var object = allObjects[objectIndex];
-      print('Link to which other Object:');
-      var otherObjectIndex = int.parse(stdin.readLineSync() ?? '0');
-      var otherAnchor = allObjects[otherObjectIndex];
-      object.linkTo(otherAnchor);
-    }
-
-    if (command == 'del') {
-      print('Object index:');
-      var objectIndex = int.parse(stdin.readLineSync() ?? '0');
-      allObjects.removeAt(objectIndex);
-    }
-
-    if (command == 'q') {
-      break;
+    switch (command) {
+      case 'open':
+        openWorkingDirsWindows();
+        break;
+      case 'dir':
+        chooseWorkingDir();
+        break;
+      case 'cl':
+        crateListOfObjectsFromDir();
+        break;
+      case 'ls':
+        listAllObjectsInDir();
+        break;
+      case 'add':
+        addNewObject();
+        break;
+      case 'addd':
+        addMultipleNewObjects();
+        break;
+      case 'sort':
+        var s = Stopwatch()..start();
+        AnchorSort<TestObject>()(allObjects);
+        print(s.elapsedMicroseconds);
+        break;
+      case 'shuffle':
+        allObjects.shuffle();
+        break;
+      case 'edit':
+        editObjectText();
+        break;
+      case 'link':
+        linkTwoObjects();
+        break;
+      case 'del':
+        deleteObject();
+        break;
+      case 'q':
+        run = false;
+        break;
+      default:
+        print('invalid command');
     }
   }
 }
 
-List<TestObject> crateListOfObjects(Directory testDir) {
-  var allObjects = <TestObject>[];
-  for (var dir in testDir.listSync().whereType<Directory>()) {
+void rootExists(String path) {
+  if (!Directory(path).existsSync()) {
+    Directory(path).createSync(recursive: true);
+  }
+}
+
+void openWorkingDirsWindows() {
+  Process.runSync('open', [
+    Directory(test_dir_1).path,
+    Directory(test_dir_2).path,
+    '-g',
+  ]);
+}
+
+void chooseWorkingDir() {
+  print('Nr.:');
+  var dir = int.parse(stdin.readLineSync() ?? '0');
+  if (dir == 2) {
+    workingDirectory = test_dir_2;
+  } else {
+    workingDirectory = test_dir_1;
+  }
+}
+
+void addNewObject() {
+  var path = workingDirectory + '/page_${Random().nextInt(10000)}';
+  var newObj = TestObject(Directory(path));
+  newObj.saveObj();
+  newObj.saveAnchor();
+  allObjects.add(newObj);
+}
+
+void addMultipleNewObjects() {
+  print('how many:');
+  var amount = int.parse(stdin.readLineSync() ?? '0');
+  for (var i = 0; i < amount; i++) {
+    addNewObject();
+    sleep(Duration(milliseconds: 33));
+  }
+}
+
+void editObjectText() {
+  print('Object index:');
+  var objectIndex = int.parse(stdin.readLineSync() ?? '0');
+  var object = allObjects[objectIndex];
+  object.text = stdin.readLineSync() ?? 'empty';
+  object.saveObj();
+}
+
+void linkTwoObjects() {
+  print('Object index:');
+  var objectIndex = int.parse(stdin.readLineSync() ?? '0');
+  var object = allObjects[objectIndex];
+  print('Link to which other Object:');
+  var otherObjectIndex = int.parse(stdin.readLineSync() ?? '0');
+  var otherAnchor = allObjects[otherObjectIndex];
+  object.linkTo(otherAnchor);
+  object.saveAnchor();
+}
+
+void deleteObject() {
+  print('Object index:');
+  var objectIndex = int.parse(stdin.readLineSync() ?? '0');
+  allObjects.removeAt(objectIndex);
+}
+
+void crateListOfObjectsFromDir() {
+  var wdir = Directory(workingDirectory);
+  allObjects = <TestObject>[];
+  for (var dir in wdir.listSync().whereType<Directory>()) {
     allObjects.add(TestObject.formDir(dir));
   }
-  return allObjects;
+  AnchorSort<TestObject>()(allObjects);
+  listAllObjectsInDir();
 }
 
-void listAllObjects(List<TestObject> allObjects) {
+void listAllObjectsInDir() {
+  print(workingDirectory.substring(5));
   var count = 0;
   for (var obj in allObjects) {
     var index = count < 10 ? '0$count' : '$count';
