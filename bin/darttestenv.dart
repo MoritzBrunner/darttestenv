@@ -67,6 +67,10 @@ void main() {
       allObjects.clear();
     }
 
+    if (command == 'cl') {
+      allObjects = crateListOfObjects(Directory(workingDirectory));
+    }
+
     if (command == 'ls') {
       print(workingDirectory.substring(5));
       listAllObjects(allObjects);
