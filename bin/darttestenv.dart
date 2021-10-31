@@ -52,8 +52,11 @@ void main() {
     var command = stdin.readLineSync();
 
     if (command == 'open') {
-      Process.runSync(
-          'open', [Directory(test_dir_1).path, Directory(test_dir_2).path]);
+      Process.runSync('open', [
+        Directory(test_dir_1).path,
+        Directory(test_dir_2).path,
+        '-g',
+      ]);
     }
 
     if (command == 'dir') {
