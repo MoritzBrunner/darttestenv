@@ -6,18 +6,20 @@ abstract class Anchor {
   static const anchorFileName = '.anchor.csv';
 
   var anchor = <int>[
-    DateTime.now()
-        .millisecondsSinceEpoch, // bundle but it needs that time name because this is the way for things that got attached above to find their place if x gets deleted, their name would not be the right place
-    DateTime.now().millisecondsSinceEpoch +
-        1 // i feel like this is a recipe for desaster
+    DateTime.now().millisecondsSinceEpoch,
+    DateTime.now().millisecondsSinceEpoch + 1
   ];
+  // bundle but it needs that time name because this is the way for things that got attached above to find their place if x gets deleted, their name would not be the right place
+  // i feel like +1 this is a recipe for desaster
 
-  void linkTo(Anchor otherObject) {
-    // add Place up or down
-    anchor = otherObject.anchor + [DateTime.now().millisecondsSinceEpoch];
+  void linkTo(Anchor otherObject, bool above) {
+    var newAnchor = List<int>.from(otherObject.anchor);
+    if (above) newAnchor.removeLast();
+    anchor = newAnchor..add(DateTime.now().millisecondsSinceEpoch);
   }
 
-  // what happens if i want it on top
+  // what happens if i want it on top?
+
   /// problem imagine:
   /// moving thing up but now i want it back where it was
   /// it will link to the one above, now it has no real connection to the one
@@ -26,7 +28,9 @@ abstract class Anchor {
   ///
   /// solution:
   /// you choose, if up normal
-  /// if down the anchor gets copied exept the anchor.last that one is replaced by DTN then it should be above
+  /// if down the anchor gets copied exept the anchor.last that one is replaced by DTN then it should be above, problem: it only works once
+  ///
+  /// what if it is above by default
 
   void anchorFromDir(Directory dir) {
     var string = File(dir.path + '/' + anchorFileName).readAsStringSync();

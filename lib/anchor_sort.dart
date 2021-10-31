@@ -16,7 +16,6 @@ abstract class Anchor {
   var anchor = <int>[DateTime.now().millisecondsSinceEpoch];
 
   void linkTo(Anchor otherObject) {
-    // add Place up or down
     anchor = otherObject.anchor + [DateTime.now().millisecondsSinceEpoch];
   }
 
