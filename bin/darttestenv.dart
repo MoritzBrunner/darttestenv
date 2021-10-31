@@ -2,7 +2,6 @@ import 'dart:io';
 import 'dart:math';
 
 import 'package:darttestenv/anchor_sort.dart';
-// import 'package:darttestenv/a2.dart';
 
 extension Name on FileSystemEntity {
   String get name {
@@ -107,10 +106,7 @@ void linkTwoObjects() {
   print('Link to which other Object:');
   var otherObjectIndex = int.parse(stdin.readLineSync() ?? '0');
   var otherAnchor = allObjects[otherObjectIndex];
-  print('above?');
-  var above = false;
-  above = int.parse(stdin.readLineSync() ?? '0') == 1;
-  object.linkTo(otherAnchor, above);
+  object.linkTo(otherAnchor);
   object.saveAnchor();
 }
 

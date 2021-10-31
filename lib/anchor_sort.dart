@@ -19,17 +19,6 @@ abstract class Anchor {
     anchor = otherObject.anchor + [DateTime.now().millisecondsSinceEpoch];
   }
 
-  // what happens if i want it on top
-  /// problem imagine:
-  /// moving thing up but now i want it back where it was
-  /// it will link to the one above, now it has no real connection to the one
-  /// below exept time. so everything that was created on an other device will
-  /// be apear beween the two even though i dont want that
-  ///
-  /// solution:
-  /// you choose, if up normal
-  /// if down the anchor gets copied exept the anchor.last that one is replaced by DTN then it should be above
-
   void anchorFromDir(Directory dir) {
     var string = File(dir.path + '/' + anchorFileName).readAsStringSync();
     anchor = string.split(',').map(int.parse).toList();
