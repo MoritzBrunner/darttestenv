@@ -51,6 +51,11 @@ void main() {
     print('command:');
     var command = stdin.readLineSync();
 
+    if (command == 'open') {
+      Process.runSync(
+          'open', [Directory(test_dir_1).path, Directory(test_dir_2).path]);
+    }
+
     if (command == 'dir') {
       print('Nr.:');
       var dir = int.parse(stdin.readLineSync() ?? '0');
@@ -60,9 +65,6 @@ void main() {
         workingDirectory = test_dir_1;
       }
       allObjects.clear();
-    }
-    if (command == 'cl') {
-      allObjects = crateListOfObjects(Directory(workingDirectory));
     }
 
     if (command == 'ls') {
