@@ -2,18 +2,15 @@ import 'dart:collection';
 
 import 'dart:io';
 
-/// ## Algorithm ahead! ##
-
-/// This is AnchorSort.
-/// AnchorSort allows any Object to be sorted.
-///
-/// You put a list of all objects (that have an anchor) into it and it spits out
-/// a sorted list of all these objects.
-
 abstract class Anchor {
   static const anchorFileName = '.anchor.csv';
 
-  var anchor = <int>[DateTime.now().millisecondsSinceEpoch];
+  var anchor = <int>[
+    DateTime.now()
+        .millisecondsSinceEpoch, // bundle but it needs that time name because this is the way for things that got attached above to find their place if x gets deleted, their name would not be the right place
+    DateTime.now().millisecondsSinceEpoch +
+        1 // i feel like this is a recipe for desaster
+  ];
 
   void linkTo(Anchor otherObject) {
     // add Place up or down
@@ -69,19 +66,14 @@ class AnchorSort<E extends Anchor> {
     var timeline = SplayTreeMap<int, SplayTreeSet<int>>(reversed);
 
     for (var anchor in allAnchors) {
-      if (anchor.length > 1) {
-        for (var i = anchor.length - 2; i >= 0; i--) {
-          if (attachmentRegister.containsKey(anchor[i])) {
-            attachmentRegister[anchor[i]]!.add(anchor.last);
-            break;
-          } else if (i == 0) {
-            timeline.putIfAbsent(anchor[i], () => SplayTreeSet(reversed));
-            timeline[anchor[i]]!.add(anchor.last);
-          }
+      for (var i = anchor.length - 2; i >= 0; i--) {
+        if (attachmentRegister.containsKey(anchor[i])) {
+          attachmentRegister[anchor[i]]!.add(anchor.last);
+          break;
+        } else if (i == 0) {
+          timeline.putIfAbsent(anchor.first, () => SplayTreeSet(reversed));
+          timeline[anchor.first]!.add(anchor.last);
         }
-      } else {
-        timeline.putIfAbsent(anchor.last, () => SplayTreeSet(reversed));
-        timeline[anchor.last]!.add(anchor.last);
       }
     }
 
