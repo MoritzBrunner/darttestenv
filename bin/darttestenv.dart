@@ -47,15 +47,19 @@ void main() {
 
   var allObjects = <TestObject>[];
 
+  var c = File('test/c.txt');
+
   while (true) {
     print('command:');
     var command = stdin.readLineSync();
 
     if (command == 'open') {
-      Process.runSync('open', ['-a Safari']);
+      // Process.runSync('open', ['-a', 'terminal', '-n']);
       // Process.runSync('osascript', [
       //   '-e tell application "Terminal"',
-      //   '-e set position of front window to {800, 1}',
+      //   //'-e tell application "System Events" to keystroke "n" using {command down}',
+      //   '-e set position of window 1 to {800, 1}',
+      //   '-e do script "cd development"',
       //   '-e end tell',
       // ]);
       // Process.runSync('open', [
@@ -63,6 +67,10 @@ void main() {
       //   Directory(test_dir_2).path,
       //   '-g',
       // ]);
+    }
+
+    if (command == 'r') {
+      print(c.readAsStringSync());
     }
 
     if (command == 'dir') {
@@ -108,6 +116,8 @@ void main() {
       var s = Stopwatch()..start();
       AnchorSort<TestObject>()(allObjects);
       print(s.elapsedMicroseconds);
+      c.writeAsStringSync(allObjects.toString());
+      Process.runSync('open', [c.path, '-n', '-g']);
     }
 
     if (command == 'shuffle') {
