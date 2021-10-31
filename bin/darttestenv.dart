@@ -52,11 +52,17 @@ void main() {
     var command = stdin.readLineSync();
 
     if (command == 'open') {
-      Process.runSync('open', [
-        Directory(test_dir_1).path,
-        Directory(test_dir_2).path,
-        '-g',
-      ]);
+      Process.runSync('open', ['-a Safari']);
+      // Process.runSync('osascript', [
+      //   '-e tell application "Terminal"',
+      //   '-e set position of front window to {800, 1}',
+      //   '-e end tell',
+      // ]);
+      // Process.runSync('open', [
+      //   Directory(test_dir_1).path,
+      //   Directory(test_dir_2).path,
+      //   '-g',
+      // ]);
     }
 
     if (command == 'dir') {
