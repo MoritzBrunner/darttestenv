@@ -19,7 +19,7 @@
 ///
 /// class Page {
 ///   anchor:
-///   optional bundle: anchor of bundle must be renamed but necessary if self finding
+///   optional bundle: anchor of bundle must be renamed but necessary if self finding or creating, only makes sense if they have anchors
 /// }
 ///
 ///
@@ -32,12 +32,29 @@
 /// f: create anchor file, adopt form anchor form bundle of 4-1
 /// list bundle sublist form one at index 4?5? rename all to new folder
 /// 
-/// 
-/// var index = where space has been inserted
+/// create a spacer
+/// var index = where spacer has been inserted
 /// File side:
 /// - create new folder, name form bundle of index-1 in list
 /// - create anchor file, anchor link to bundle form index-1 in list
-/// - move all pages form the old folder
-///   get address index+1 put in list, if index+2 is page (and not spacer) put address in list, if index+x is spacer brake
-///   each address in list rename to folder and page_1 2 3
+/// - move all pages form the old folder to the new
+///   get address index+1 put in list, if index+2 is page (and not spacer) put address in list, if index+x is spacer break
+///   each address in list rename to folder and page_1 2 3 > problem because some systems 123 other 321 
 /// - done
+/// 
+/// delete a spacer
+/// var index = where spacer got removed
+/// File side:
+/// - move all pages to the other folder
+///   get address index put in list, if index+1 is page (and not spacer) put address in list, if index+x is spacer break
+///   each address in list rename to folder from index-1 and page_j+1 j+2 j+3 (j = page name index-1) and link each anchor mass linking not possible with anchors because DTN, sort by page name not possible because some systems sort 123 other 321, it is possible with sleep function but than maybe microseconds?
+/// 
+/// 
+/// dont use anchor when using anchor slower is than renaming 
+/// give pages a hidden file placement that contains page number (duplicates ahead) and bundle anchor (useless if it gets moved)
+/// 
+/// posibilities:
+/// - use anchor with microseconds so mass linking becomes fast
+/// - use anchor with milliseconds but mass linking becomes slow fast
+/// - use number, needs renaming of all other (no just the same ones that also need anchor change, but with creation in between a lot need renaming), not safe when individual pages get removed
+/// - use register together with unique keys, not safe when individual pages get removed, complete order is lost when register is lost
