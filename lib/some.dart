@@ -63,8 +63,10 @@
 /// 
 /// 
 /// 
-/// /// create a spacer
+/// # create a spacer
 /// var index = where spacer has been inserted
+/// List side:
+/// - insert index spacer class that holds nothing
 /// File side:
 /// - create new folder, name form bundle of index-1 in list
 /// - create anchor file, anchor link to bundle form index-1 in list
@@ -74,8 +76,10 @@
 /// - done
 /// 
 /// 
-/// /// delete a spacer
+/// # delete a spacer
 /// var index = where spacer got removed
+/// List side: 
+/// - remove index
 /// File side:
 /// - move all pages to the upper folder
 ///   get address index put in list, if index+1 is page (and not spacer) put address in list, if index+x is spacer break
@@ -83,6 +87,59 @@
 /// - delete folder from index
 /// - done
 /// 
-/// /// move a spacer
+/// # move a spacer
 /// File side:
 /// - a combination of create and delete
+/// 
+/// # create a page in between bzw inside a bundle
+/// var index = where page was created
+/// List side:
+/// - insert at index page class that holds folder name of index+1 anchor linked to anchor index+1
+/// File side:
+/// - create a new page folder unique name inside folder from page class
+/// - add anchor file with anchor form page class
+/// 
+/// # crate a page on top
+/// var index = if index is 0
+/// List side: 
+/// - insert at 0 page class that holds 
+///   a bundle directory with the new name DTN down to milliseconds
+///   a new bundle anchor from DTN
+///   a new page directory with new unique name 
+///   a new page anchor from DTN
+///   a entry file that does not exist 
+/// - insert at 1 a spacer class that holds noting
+/// File side:
+/// - create a new bundle folder with name from page class
+/// - create a new anchor file with anchor form page class
+/// - create a new page folder with unique name 
+/// - create a new anchor file with anchor from page class
+/// - no entry.json
+/// 
+/// 
+/// # page form directory
+/// File side:
+/// - get dir from that take anchor bundle dir page dir even if not existant reference File(pagedir + entry.json) 
+/// 
+/// # spacer from directory 
+/// - insert in the listing progress between bundles
+/// 
+/// 
+/// 
+/// need
+/// - a file system that is like in the app
+///   bundles with anchor, pages inside with anchor
+/// - class TGTBListItem > TGTBPage, TGTBSpacer
+/// - anchor sort
+/// - 
+/// 
+/// 
+/// 
+/// 
+/// class Page {
+///   bundle directory 
+///   bundle anchor
+///   page directory
+///   page anchor
+///   page entry file
+/// }
