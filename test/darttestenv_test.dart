@@ -34,11 +34,4 @@ void main() {
   test('test 1', () {
     TestObject.formDir(Directory('test/test_dir_1/page_8149'));
   });
-  test('test 2', () {
-    var a = DateTime.now().millisecondsSinceEpoch;
-    var b = DateTime.now().microsecondsSinceEpoch;
-    print(b);
-    var c = DateTime(90000).microsecondsSinceEpoch;
-    print(c);
-  });
 }
