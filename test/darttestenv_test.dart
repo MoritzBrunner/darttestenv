@@ -4,40 +4,23 @@ import 'package:darttestenv/a1.dart';
 import 'package:darttestenv/anchor_sort.dart';
 import 'package:test/test.dart';
 
-// extension Name on FileSystemEntity {
-//   String get name {
-//     return path.split('/').last.split(r'\').last;
-//   }
-// }
-
-class TestObject with Anchor {
-  static const String entryFileName = 'entry.txt';
-  final Directory dir;
-  String text = 'empty';
-  TestObject(this.dir);
-
-  String get dirName => dir.name;
-
-  TestObject.formDir(this.dir) {
-    text = File(dir.path + '/' + entryFileName).readAsStringSync();
-    anchorFromDir(dir);
-  }
-
-  void save() {
-    File(dir.path + '/' + entryFileName)
-      ..create()
-      ..writeAsString(text);
-    anchorToDir(dir);
-  }
+class F with Anchor {
+  int i;
+  F(this.i);
 }
 
 void main() {
-  test('test 1', () {
-    TestObject.formDir(Directory('test/test_dir_1/page_8149'));
+  test('AnchorSort quick test', () {
+    var l = List.generate(5, (i) {
+      sleep(Duration(milliseconds: 250));
+      return F(i);
+    });
+    l.forEach((e) => print(e.i));
+    AnchorSort<F>()(l);
+    l.forEach((e) => print(e.i));
   });
   test('test 2', () {
     print(TGTBBundle);
     sleep(Duration(seconds: 1));
-    TGTBBundle.createNew();
   });
 }

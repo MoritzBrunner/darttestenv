@@ -13,22 +13,23 @@ import 'dart:io';
 abstract class Anchor {
   static const anchorFileName = '.anchor.csv';
 
-  var anchor = <int>[DateTime.now().millisecondsSinceEpoch];
+  var _anchor = <int>[DateTime.now().millisecondsSinceEpoch];
+  List<int> get anchor => _anchor;
 
   @protected
   void linkTo(Anchor otherObject) {
-    anchor = otherObject.anchor + [DateTime.now().millisecondsSinceEpoch];
+    _anchor = otherObject._anchor + [DateTime.now().millisecondsSinceEpoch];
   }
 
   @protected
   void anchorFromDir(Directory dir) {
     var string = File(dir.path + '/' + anchorFileName).readAsStringSync();
-    anchor = string.split(',').map(int.parse).toList();
+    _anchor = string.split(',').map(int.parse).toList();
   }
 
   @protected
   void anchorToDir(Directory dir) {
-    var string = anchor.toString().replaceFirst('[', '').replaceFirst(']', '');
+    var string = _anchor.toString().replaceFirst('[', '').replaceFirst(']', '');
     File(dir.path + '/' + anchorFileName)
       ..createSync(recursive: true)
       ..writeAsStringSync(string);
@@ -40,8 +41,8 @@ class AnchorSort<E extends Anchor> {
     var allAnchors = <List<int>>[];
     var reference = <int, E>{};
     for (var obj in allObjects) {
-      allAnchors.add(obj.anchor);
-      reference[obj.anchor.last] = obj;
+      allAnchors.add(obj._anchor);
+      reference[obj._anchor.last] = obj;
     }
     var sortedAnchors = _anchorSort(allAnchors);
     allObjects.clear();
