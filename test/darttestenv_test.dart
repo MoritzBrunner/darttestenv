@@ -1,13 +1,14 @@
 import 'dart:io';
 
+import 'package:darttestenv/a1.dart';
 import 'package:darttestenv/anchor_sort.dart';
 import 'package:test/test.dart';
 
-extension Name on FileSystemEntity {
-  String get name {
-    return path.split('/').last.split(r'\').last;
-  }
-}
+// extension Name on FileSystemEntity {
+//   String get name {
+//     return path.split('/').last.split(r'\').last;
+//   }
+// }
 
 class TestObject with Anchor {
   static const String entryFileName = 'entry.txt';
@@ -35,10 +36,9 @@ void main() {
     TestObject.formDir(Directory('test/test_dir_1/page_8149'));
   });
   test('test 2', () {
-    var a = DateTime.now().millisecondsSinceEpoch;
-    var b = DateTime.now().microsecondsSinceEpoch;
-    print(b);
-    var c = DateTime(90000).microsecondsSinceEpoch;
-    print(c);
+    print(TGTBBundle.uniqueKey());
+    sleep(Duration(seconds: 1));
+    print(TGTBBundle.uniqueKey());
+    print(TGTBBundle().date);
   });
 }

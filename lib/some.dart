@@ -124,7 +124,7 @@
 /// # spacer from directory 
 /// - insert in the listing progress between bundles
 /// 
-/// 
+/// # later move bundle but thats a whole different list
 /// 
 /// need
 /// - a file system that is like in the app

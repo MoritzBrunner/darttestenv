@@ -50,11 +50,12 @@ class AnchorSort<E extends Anchor> {
     int reversed(int a, int b) => b.compareTo(a);
 
     var attachmentRegister = HashMap<int, SplayTreeSet<int>>.fromIterable(
-        allAnchors,
-        key: (anchor) => anchor.last,
-        value: (_) => SplayTreeSet(reversed));
+      allAnchors,
+      key: (anchor) => anchor.last,
+      value: (_) => SplayTreeSet(reversed),
+    );
 
-    var timeline = SplayTreeMap<int, SplayTreeSet<int>>(reversed);
+    var timeLine = SplayTreeMap<int, SplayTreeSet<int>>(reversed);
 
     for (var anchor in allAnchors) {
       if (anchor.length > 1) {
@@ -63,18 +64,18 @@ class AnchorSort<E extends Anchor> {
             attachmentRegister[anchor[i]]!.add(anchor.last);
             break;
           } else if (i == 0) {
-            timeline.putIfAbsent(anchor[i], () => SplayTreeSet(reversed));
-            timeline[anchor[i]]!.add(anchor.last);
+            timeLine.putIfAbsent(anchor.first, () => SplayTreeSet(reversed));
+            timeLine[anchor.first]!.add(anchor.last);
           }
         }
       } else {
-        timeline.putIfAbsent(anchor.last, () => SplayTreeSet(reversed));
-        timeline[anchor.last]!.add(anchor.last);
+        timeLine.putIfAbsent(anchor.last, () => SplayTreeSet(reversed));
+        timeLine[anchor.last]!.add(anchor.last);
       }
     }
 
     var sorted = <int>[];
-    for (var anchors in timeline.values) {
+    for (var anchors in timeLine.values) {
       sorted.addAll(_knotAChain(attachmentRegister, anchors.toList()));
     }
     return sorted;
