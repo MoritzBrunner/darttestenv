@@ -1,9 +1,12 @@
 import 'dart:io';
 import 'dart:math';
 
+import 'package:darttestenv/a1.dart';
 import 'package:darttestenv/anchor_sort.dart';
 
 const root = 'test/test_dir_1/Bundle';
+
+var list = [];
 
 void main() {
   rootExists(root);
@@ -43,9 +46,24 @@ void listAll() {
   }
 }
 
+void go() {
+  for (var bundle in Directory('test/test_dir_1/Bundles').listSync()) {
+    if (bundle is Directory) {
+      list.add(Spacer());
+      for (var pageDir in bundle.listSync()) {
+        if (pageDir is Directory) {
+          var content = TGTBPageDirectory.fromDirectory(pageDir);
+          list.add(Page(content));
+        }
+      }
+    }
+  }
+}
+
 void addPage() {
   print('where?');
-  var amount = int.parse(stdin.readLineSync() ?? '0');
+  var index = int.parse(stdin.readLineSync() ?? '0');
+  if(list[index] is TGTBPageDirectory)
 }
 
 void rootExists(String path) {
