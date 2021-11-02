@@ -96,47 +96,21 @@ class TGTBPageDirectory extends TGTBListItem with Anchor {
     linkTo(otherPage);
     anchorToDir(_dir);
   }
-
-  // File pageContent;
-  // Directory bundleDir;
-  // List<int> bundleAnchor;
-  // Directory pageDir;
-  // List<int> pageAnchor;
-  // File pageContent;
-
-  // TGTBPage(
-  //   this.bundleDir,
-  //   this.bundleAnchor,
-  //   this.pageDir,
-  //   this.pageAnchor,
-  //   this.pageContent,
-  // );
-
-  // TGTBPage.fromDirectory(Directory dir) {
-  //   pageContent = File(dir.path + '/' + _fileName);
-  //   anchorFromDir(dir);
-  // }
 }
 
-///
-///
-///
-// addPage(List<TGTBListItem> list, int index) {
-//   TGTBPage newPage;
-//   if (index == 0) {
-//     var bundleDirPath = DateTime.now().toIso8601String();
-//     var bundleDir = Directory('test/test_dir_1/bundles/' + bundleDirPath);
-//     var bundleAnchor =
-//     var newPage =
-//         TGTBPage(bundleDir, bundleAnchor, pageDir, pageAnchor, pageContent);
-//   } else {
-//     newPage =
-//         TGTBPage(bundleDir, bundleAnchor, pageDir, pageAnchor, pageContent);
-//   }
-//   list.insert(index, newPage);
-// }
+class Register {
+  var register = <TGTBListItem>[];
 
-addSpacer() {}
+  allBundles() {
+    var allB = <TGTBBundleDirectory>[];
 
-addSpacerAt(int index) {}
-addPageAt(int index) {}
+    var l = Directory('test/test_dir_1/Bundles').listSync();
+    for (var fse in l) {
+      if (fse is Directory) {
+        allB.add(TGTBBundleDirectory.formDirectory(fse));
+      }
+    }
+
+    AnchorSort()(allB);
+  }
+}

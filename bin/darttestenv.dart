@@ -3,42 +3,10 @@ import 'dart:math';
 
 import 'package:darttestenv/anchor_sort.dart';
 
-extension Name on FileSystemEntity {
-  String get name {
-    return path.split('/').last.split(r'\').last;
-  }
-}
+const root = 'test/test_dir_1/Bundle';
 
-class TestObject with Anchor {
-  static const String entryFileName = 'entry.txt';
-
-  final Directory dir;
-  TestObject(this.dir);
-
-  String text = 'empty';
-
-  String get dirName => dir.name;
-
-  TestObject.formDir(this.dir) {
-    text = File(dir.path + '/' + entryFileName).readAsStringSync();
-    anchorFromDir(dir);
-  }
-
-  void saveObj() {
-    File(dir.path + '/' + entryFileName)
-      ..createSync(recursive: true)
-      ..writeAsStringSync(text);
-  }
-
-  void saveAnchor() {
-    anchorToDir(dir);
-  }
-}
-
-var allObjects = <TestObject>[];
 void main() {
-  rootExists('test/test_dir_1');
-  rootExists('test/test_dir_2');
+  rootExists(root);
 
   var run = true;
 
@@ -68,6 +36,18 @@ void main() {
   }
 }
 
+void listAll() {
+  var all = Directory(root).listSync(recursive: true);
+  for (var i in all) {
+    print(i.path);
+  }
+}
+
+void addPage() {
+  print('where?');
+  var amount = int.parse(stdin.readLineSync() ?? '0');
+}
+
 void rootExists(String path) {
   if (!Directory(path).existsSync()) {
     Directory(path).createSync(recursive: true);
@@ -76,18 +56,14 @@ void rootExists(String path) {
 
 void openWorkingDirsWindows() {
   Process.runSync('open', [
-    Directory('test/test_dir_1').path,
-    Directory('test/test_dir_2').path,
+    Directory(root).path,
     '-g',
   ]);
 }
 
-void addNewObject() {
-  var path = 'test/test_dir_1/page_${Random().nextInt(10000)}';
-  var newObj = TestObject(Directory(path));
-  newObj.saveObj();
-  newObj.saveAnchor();
-  allObjects.add(newObj);
+void addPage() {
+  print('where?');
+  var amount = int.parse(stdin.readLineSync() ?? '0');
 }
 
 void addMultipleNewObjects() {
