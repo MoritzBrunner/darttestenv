@@ -13,10 +13,10 @@ import 'dart:io';
 abstract class Anchor {
   static const anchorFileName = '.anchor.csv';
 
-  var _anchor = <int>[];
+  var _anchor = <int>[DateTime.now().millisecondsSinceEpoch];
 
   @protected
-  void initiateAnchor() => _anchor = [DateTime.now().millisecondsSinceEpoch];
+  void resetAnchor() => _anchor = [DateTime.now().millisecondsSinceEpoch];
 
   @protected
   List<int> get anchor => _anchor;

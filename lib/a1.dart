@@ -10,7 +10,7 @@ extension Name on FileSystemEntity {
 
 abstract class TGTBListItem {}
 
-class TGTBBundle with Anchor {
+class TGTBBundleDirectory with Anchor {
   static const _root = 'test/test_dir_1/Bundles/';
   static const _addOn = 'Bundle_';
   String get _date => _dir.name.substring(_addOn.length, _addOn.length + 10);
@@ -22,25 +22,19 @@ class TGTBBundle with Anchor {
   Directory get directory => _dir;
   List<int> get bundleAnchor => anchor;
 
-  TGTBBundle.formDirectory(this._dir) {
+  TGTBBundleDirectory.formDirectory(this._dir) {
     // maybe add a check if _dir is valid
     anchorFromDir(_dir);
   }
 
-  TGTBBundle.createNew() {
+  TGTBBundleDirectory.createNew() {
     var date = DateTime.now().toString().substring(0, 10);
     _dir = Directory(_path(date))..createSync();
     anchorToDir(_dir);
   }
 
-  TGTBBundle.createBelow(TGTBBundle otherBundle) {
+  TGTBBundleDirectory.createBelow(TGTBBundleDirectory otherBundle) {
     _dir = Directory(_path(otherBundle._date))..createSync();
-    linkTo(otherBundle);
-    anchorToDir(_dir);
-  }
-
-  void moveBelow(TGTBBundle otherBundle) {
-    _dir = _dir.renameSync(_path(otherBundle._date));
     linkTo(otherBundle);
     anchorToDir(_dir);
   }
@@ -48,45 +42,58 @@ class TGTBBundle with Anchor {
   void moveTop() {
     var date = DateTime.now().toString().substring(0, 10);
     _dir = _dir.renameSync(_path(date))..createSync();
-    newAnchor();
+    resetAnchor();
+    anchorToDir(_dir);
+  }
+
+  void moveBelow(TGTBBundleDirectory otherBundle) {
+    _dir = _dir.renameSync(_path(otherBundle._date));
+    linkTo(otherBundle);
     anchorToDir(_dir);
   }
 }
 
-class TGTBPage extends TGTBListItem with Anchor {
+class TGTBPageDirectory extends TGTBListItem with Anchor {
   static const _addOn = 'Page_';
   String get _uniqueKey => DateTime.now().millisecondsSinceEpoch.toString();
   String get _name => _addOn + _uniqueKey;
 
-  static const _fileName = 'entry.json';
-
   late Directory _dir;
   Directory get directory => _dir;
   List<int> get pageAnchor => anchor;
-  TGTBBundle get bundle => TGTBBundle.formDirectory(_dir.parent);
+  TGTBBundleDirectory get bundle =>
+      TGTBBundleDirectory.formDirectory(_dir.parent);
 
-  TGTBPage.fromDirectory(this._dir) {
+  TGTBPageDirectory.fromDirectory(this._dir) {
     anchorFromDir(_dir);
   }
 
-  TGTBPage.createNew(TGTBBundle bundle) {
+  TGTBPageDirectory.createNew(TGTBBundleDirectory bundle) {
     var path = bundle.directory.path + '/' + _name;
-    _dir = Directory(path)..createSync(recursive: true);
+    _dir = Directory(path)..createSync();
     anchorToDir(_dir);
   }
 
-  TGTBPage.createBelow(TGTBPage otherPage) {
+  TGTBPageDirectory.createBelow(TGTBPageDirectory otherPage) {
     var bundle = otherPage.bundle;
     var path = bundle.directory.path + '/' + _name;
-    _dir = Directory(path)..createSync(recursive: true);
+    _dir = Directory(path)..createSync();
     linkTo(otherPage);
     anchorToDir(_dir);
   }
 
-  void moveTopOfBundle(TGTBBundle bundle) {
+  void moveTopOfBundle(TGTBBundleDirectory bundle) {
     var path = bundle.directory.path + '/' + _name;
     _dir = _dir.renameSync(path);
-    newAnchor();
+    resetAnchor();
+    anchorToDir(_dir);
+  }
+
+  void moveBelow(TGTBPageDirectory otherPage) {
+    var bundle = otherPage.bundle;
+    var newPath = bundle.directory.path + '/' + _name;
+    _dir = _dir.renameSync(newPath);
+    linkTo(otherPage);
     anchorToDir(_dir);
   }
 
