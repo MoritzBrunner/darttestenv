@@ -20,7 +20,6 @@ void main() {
     l.forEach((e) => print(e.i));
   });
   test('test 2', () {
-    print(TGTBBundle);
-    sleep(Duration(seconds: 1));
+    TGTBBundle.createNew();
   });
 }
