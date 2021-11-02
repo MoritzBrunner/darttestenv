@@ -1,5 +1,5 @@
 import 'dart:collection';
-
+import 'package:meta/meta.dart';
 import 'dart:io';
 
 /// ## Algorithm ahead! ##
@@ -15,15 +15,18 @@ abstract class Anchor {
 
   var anchor = <int>[DateTime.now().millisecondsSinceEpoch];
 
+  @protected
   void linkTo(Anchor otherObject) {
     anchor = otherObject.anchor + [DateTime.now().millisecondsSinceEpoch];
   }
 
+  @protected
   void anchorFromDir(Directory dir) {
     var string = File(dir.path + '/' + anchorFileName).readAsStringSync();
     anchor = string.split(',').map(int.parse).toList();
   }
 
+  @protected
   void anchorToDir(Directory dir) {
     var string = anchor.toString().replaceFirst('[', '').replaceFirst(']', '');
     File(dir.path + '/' + anchorFileName)

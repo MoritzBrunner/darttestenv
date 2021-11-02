@@ -36,9 +36,8 @@ void main() {
     TestObject.formDir(Directory('test/test_dir_1/page_8149'));
   });
   test('test 2', () {
-    print(TGTBBundle.uniqueKey());
+    print(TGTBBundle);
     sleep(Duration(seconds: 1));
-    print(TGTBBundle.uniqueKey());
-    print(TGTBBundle().date);
+    TGTBBundle.createNew();
   });
 }

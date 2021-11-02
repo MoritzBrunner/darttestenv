@@ -13,60 +13,27 @@ extension Name on FileSystemEntity {
 }
 
 class TGTBBundle with Anchor {
-  static const root = 'test/test_dir_1/bundles/';
-  static const addOn = 'Bundle_';
-  static String uniqueKey() => DateTime.now().millisecondsSinceEpoch.toString();
+  static const _root = 'test/test_dir_1/bundles/';
+  static const _addOn = 'Bundle_';
 
-  static String path(String date) => root + addOn + date + '_' + uniqueKey();
+  static String _uniqueKey() =>
+      DateTime.now().millisecondsSinceEpoch.toString();
+
+  static String _path(String date) =>
+      _root + _addOn + date + '_' + _uniqueKey();
 
   Directory _dir;
-  Directory get dir => _dir;
-  TGTBBundle._(this._dir);
+  TGTBBundle(this._dir);
 
-  String get date => _dir.name.substring(addOn.length, addOn.length + 10);
+  String get _date => _dir.name.substring(_addOn.length, _addOn.length + 10);
 
-  factory TGTBBundle() {
+  factory TGTBBundle.createNew() {
     var date = DateTime.now().toString().substring(0, 10);
-    return TGTBBundle._(Directory(path(date)));
-  }
-
-  TGTBBundle.fromDirectory(this._dir) {
-    anchorFromDir(_dir);
+    return TGTBBundle(Directory(_path(date)));
   }
 
   void moveTo(TGTBBundle otherBundle) {
-    _dir = Directory(path(otherBundle.date));
-    linkTo(otherBundle);
-  }
-}
-
-class TGTBBundle2 with Anchor {
-  static const root = 'test/test_dir_1/bundles/';
-  static const addOn = 'Bundle_';
-
-  String _date = DateTime.now().toString().substring(0, 10);
-  String _uniqueKey = DateTime.now().millisecondsSinceEpoch.toString();
-
-  String get date => _date;
-  // String get uniqueKey => _uniqueKey;
-
-  Directory get directory {
-    var path = root + addOn + _date + '_' + _uniqueKey;
-    return Directory(path);
-  }
-
-  TGTBBundle2();
-
-  TGTBBundle2.fromDirectory(Directory dir) {
-    var name = dir.name;
-    _date = name.substring(addOn.length, addOn.length + 10);
-    _uniqueKey = name.substring(addOn.length + 10);
-    anchorFromDir(dir);
-  }
-
-  void moveTo(TGTBBundle2 otherBundle) {
-    _date = otherBundle.date;
-    _uniqueKey = DateTime.now().millisecondsSinceEpoch.toString();
+    _dir = Directory(_path(otherBundle._date));
     linkTo(otherBundle);
   }
 }
