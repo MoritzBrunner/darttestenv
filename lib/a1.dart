@@ -14,7 +14,7 @@ class Spacer extends ListItem {
   Spacer();
 }
 
-class TGTBBundleDirectory with Anchor {
+class BundleDirObject with Anchor {
   static const _root = 'test/test_dir_1/Bundles/';
   static const _addOn = 'Bundle_';
   String get _date => _dir.name.substring(_addOn.length, _addOn.length + 10);
@@ -26,20 +26,20 @@ class TGTBBundleDirectory with Anchor {
   // Directory get directory => _dir;
   // List<int> get bundleAnchor => anchor;
 
-  TGTBBundleDirectory.formDirectory(this._dir) {
+  BundleDirObject.formDirectory(this._dir) {
     // maybe add a check if _dir is valid
     anchorFromDir(_dir);
   }
 
-  TGTBBundleDirectory.createNew() {
+  BundleDirObject.createNew() {
     var date = DateTime.now().toString().substring(0, 10);
     _dir = Directory(_path(date))..createSync();
     anchorToDir(_dir);
   }
 
-  TGTBBundleDirectory.createBelow(TGTBBundleDirectory otherBundle) {
+  BundleDirObject.createBelow(BundleDirObject otherBundle) {
     _dir = Directory(_path(otherBundle._date))..createSync();
-    linkTo(otherBundle);
+    linkAnchor(otherBundle);
     anchorToDir(_dir);
   }
 
@@ -50,14 +50,44 @@ class TGTBBundleDirectory with Anchor {
     anchorToDir(_dir);
   }
 
-  void moveBelow(TGTBBundleDirectory otherBundle) {
+  void moveBelow(BundleDirObject otherBundle) {
     _dir = _dir.renameSync(_path(otherBundle._date));
-    linkTo(otherBundle);
+    linkAnchor(otherBundle);
     anchorToDir(_dir);
   }
 }
 
-class TGTBPageDirectory extends ListItem with Anchor {
+// this is basically a Directory() that has an anchor
+class PageDirectory with Anchor {
+  String path;
+  PageDirectory(this.path);
+
+  void createSync({bool recursive = false}) {
+    var dir = Directory(path)..createSync(recursive: recursive);
+    anchorToDir(dir);
+  }
+
+  void linkPageDirectory(PageDirectory other) {
+    Directory(path).renameSync(other.path);
+    path = other.path;
+    linkAnchor(other);
+    anchorToDir(dir);
+  }
+
+  void renameSync(String newPath) {
+    Directory(path).renameSync(newPath);
+  }
+}
+
+some() {
+  Directory('').renameSync(newPath);
+}
+
+/// This is the programaticaly representation of a PageFolder.
+/// It holds the Directory(path) to the FileSystemObject as well as
+/// the Anchor that is stored in that FileSystemObject.
+/// This is basicaly an advanced version of a Directory()
+class PageDirObject extends ListItem with Anchor {
   static const _addOn = 'Page_';
   String get _uniqueKey => DateTime.now().millisecondsSinceEpoch.toString();
   String get _name => _addOn + _uniqueKey;
@@ -68,51 +98,60 @@ class TGTBPageDirectory extends ListItem with Anchor {
   // TGTBBundleDirectory get bundle =>
   //     TGTBBundleDirectory.formDirectory(_dir.parent);
 
-  TGTBPageDirectory.fromDirectory(this._dir) {
+  PageDirObject.fromDirectory(this._dir) {
     anchorFromDir(_dir);
   }
 
-  TGTBPageDirectory.createNew(Directory bundle) {
-    var path = bundle.path + '/' + _name;
+  // TGTBPageDirectory.createNew(Directory bundle) {
+  //   var path = bundle.path + '/' + _name;
+  //   _dir = Directory(path)..createSync();
+  //   anchorToDir(_dir);
+  // }
+
+  PageDirObject.createBelow2(PageDirObject pageDirObject) {
+    // you get this from index+1
+    var path = pageDirObject.directory.parent.path + '/' + _name;
+    // here it might be sinnvoll to make a getter to get the parent directory but it would not save much words
+    // the whole directory object is not needed
     _dir = Directory(path)..createSync();
+    linkAnchor(pageDirObject);
     anchorToDir(_dir);
   }
-
-  TGTBPageDirectory.createBelow(Directory bundle, List<int> anchor) {
+  PageDirObject.createBelow(Directory bundle, List<int> anchor) {
     var bundle = otherPage.bundle;
     var path = bundle.directory.path + '/' + _name;
     _dir = Directory(path)..createSync();
-    linkTo(otherPage);
+    linkAnchor(otherPage);
     anchorToDir(_dir);
   }
-  void moveTopOfBundle(TGTBBundleDirectory bundle) {
+  void moveTopOfBundle(BundleDirObject bundle) {
     var path = bundle.directory.path + '/' + _name;
     _dir = _dir.renameSync(path);
     resetAnchor();
     anchorToDir(_dir);
   }
 
-  void moveBelow(TGTBPageDirectory otherPage) {
+  void moveBelow(PageDirObject otherPage) {
     var newBundle = otherPage.directory.parent;
     var newPath = newBundle.path + '/' + _name;
     _dir = _dir.renameSync(newPath);
-    linkTo(otherPage);
+    linkAnchor(otherPage);
     anchorToDir(_dir);
   }
 
   move(ListItem item) {
     if (item is Spacer) {
       resetAnchor();
-    } else if (item is TGTBPageDirectory) {
+    } else if (item is PageDirObject) {
       var newBundle = item.directory.parent;
       var newPath = newBundle.path + '/' + _name;
       _dir = _dir.renameSync(newPath);
-      linkTo(item);
+      linkAnchor(item);
     }
     anchorToDir(_dir);
   }
 
-  void mvBlew(TGTBPageDirectory otherPage) {
+  void mvBlew(PageDirObject otherPage) {
     moveToDir(otherPage.directory.parent);
     linkToOtherPage(otherPage);
   }
@@ -127,8 +166,8 @@ class TGTBPageDirectory extends ListItem with Anchor {
     anchorToDir(_dir);
   }
 
-  void linkToOtherPage(TGTBPageDirectory otherPage) {
-    linkTo(otherPage);
+  void linkToOtherPage(PageDirObject otherPage) {
+    linkAnchor(otherPage);
     anchorToDir(_dir);
   }
 }
@@ -156,3 +195,8 @@ class Entry {
     File(path).writeAsStringSync(content);
   }
 }
+
+///
+/// Input:
+/// index of insertion
+/// - create folder at copy from index+1
