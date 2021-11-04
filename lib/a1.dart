@@ -2,11 +2,16 @@ import 'dart:io';
 
 import 'anchor_sort.dart';
 
-extension Name on FileSystemEntity {
-  String get name {
-    return path.split('/').last.split(r'\').last;
-  }
-}
+// extension Name on FileSystemEntity {
+//   String get name {
+//     return path.split('/').last.split(r'\').last;
+//   }
+// }
+// extension Name on TGTBDirectory {
+//   String get name {
+//     return path.split('/').last.split(r'\').last;
+//   }
+// }
 
 abstract class ListItem {}
 
@@ -87,8 +92,86 @@ class Spacer extends ListItem {
 //   }
 // }
 
+// /// This is basically a Directory with an Anchor.
+// /// When instanciated it creates an anchor.
+// /// When created form a existing Directory it adapts the existing anchor.
+// abstract class TGTBDirectory<E extends TGTBDirectory<E>> with Anchor {
+//   final Directory directory;
+//   TGTBDirectory.newIn(this.directory);
+
+//   String get path => directory.path;
+//   Directory get parent => directory.parent;
+
+//   void createSync() {
+//     directory.createSync();
+//     anchorToDir(directory);
+//   }
+
+//   /// Linkes this TGTBDirectory to an other TGTBDirectory of the same Type.
+//   void linkDirectory(E other);
+
+//   /// Renames this TGTBDirectory.
+//   Directory _renameSync(String newPath) {
+//     return directory.renameSync(newPath);
+//   }
+
+//   TGTBDirectory.fromDirectory(this.directory) {
+//     anchorFromDir(directory);
+//   }
+// }
+
+// /// If the user creates a [Page] a PageDirectory is created.
+// /// The contents of the Page are stored in files insde this Directory.
+// ///
+// /// PageDirectories are located in [BundleDirectory]s.
+// class PageDirectory extends TGTBDirectory<PageDirectory> {
+//   // PageDirectories have a fixed naming convention
+//   static const addOn = 'Page_';
+//   static String uniqueKey() => DateTime.now().millisecondsSinceEpoch.toString();
+//   static String get name => addOn + uniqueKey();
+
+//   // PageDirectories can only be created in BundleDirectories
+//   PageDirectory(BundleDirectory bundle) : super.newIn(Directory(bundle.path + '/' + name));
+
+//   @override
+//   void linkDirectory(PageDirectory other) {
+//     var newPath = other.parent.path + '/' + name;
+//     var newDir = _renameSync(newPath);
+//     linkAnchor(other);
+//     anchorToDir(newDir);
+//   }
+
+//   PageDirectory.fromDirectory(Directory dir) : super.fromDirectory(dir);
+// }
+
+// /// If the user creates a [Bundle] a BundleDirectory is created.
+// /// [PageDirectory]s are stored insde BundleDirectories.
+// class BundleDirectory extends TGTBDirectory<BundleDirectory> {
+//   // BundleDirectories have a fixed naming convention
+//   static const addOn = 'Bundle_';
+//   static String currentDate() => DateTime.now().toString().substring(0, 10);
+//   static String uniqueKey() => DateTime.now().millisecondsSinceEpoch.toString();
+//   static String name(String date) => addOn + date + '_' + uniqueKey();
+
+//   BundleDirectory(Directory partenDirectory) : super.newIn(Directory(partenDirectory.path + '/' + name(currentDate()));
+
+//   String get date => path.substring(addOn.length, addOn.length + 10);
+
+//   @override
+//   void linkDirectory(BundleDirectory other) {
+//     // Date is copied so they appear in the same spot in a FileExplorer
+//     var newPath = other.parent.path + '/' + name(other.date);
+//     var newDir = _renameSync(newPath);
+//     linkAnchor(other);
+//     anchorToDir(newDir);
+//   }
+
+//   BundleDirectory.formDirectory(Directory dir) : super.fromDirectory(dir);
+// }
+
+//---
 /// This is basically a Directory with an Anchor.
-/// When instaciated it creates an anchor and holds a path.
+/// When instanciated it creates an anchor.
 /// When created form a existing Directory it adapts the existing anchor.
 abstract class TGTBDirectory<E extends TGTBDirectory<E>> with Anchor {
   late String _path;
@@ -97,9 +180,9 @@ abstract class TGTBDirectory<E extends TGTBDirectory<E>> with Anchor {
   String get path => _path;
   Directory get parent => Directory(_path).parent;
 
-  void createSync({bool recursive = false}) {
+  void createSync() {
     var newDir = Directory(_path);
-    newDir.createSync(recursive: recursive);
+    newDir.createSync();
     anchorToDir(newDir);
   }
 
@@ -152,16 +235,18 @@ class BundleDirectory extends TGTBDirectory<BundleDirectory> {
   static String uniqueKey() => DateTime.now().millisecondsSinceEpoch.toString();
   static String name(String date) => addOn + date + '_' + uniqueKey();
 
-  String _date = currentDate();
-  String get date => _date;
+  BundleDirectory.newAt(String path) : super(path + '/' + name(currentDate()));
 
-  BundleDirectory(String path) : super(path + '/' + name(currentDate()));
+  String get date {
+    var otherDirName = _path.split('/').last.split(r'\').last;
+    return otherDirName.substring(addOn.length, addOn.length + 10);
+  }
 
   @override
   void linkDirectory(BundleDirectory other) {
     // Date is copied so they appear in the same spot in a FileExplorer
-    _date = other.date;
-    var newPath = other.parent.path + '/' + name(other.date);
+    var otherDate = other.date;
+    var newPath = other.parent.path + '/' + name(otherDate);
     var newDir = _renameSync(newPath);
     linkAnchor(other);
     anchorToDir(newDir);
@@ -171,8 +256,7 @@ class BundleDirectory extends TGTBDirectory<BundleDirectory> {
 }
 
 some() {
-  var a = BundleDirectory('');
-  PageDirectory(a).createSync();
+  var a = BundleDirectory.newAt('path');
 }
 
 /// This is the programaticaly representation of a PageFolder.
