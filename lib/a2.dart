@@ -47,17 +47,31 @@ some() {
 
   for (var bundleAnchorMap in sortedByBundleAnchor.entries) {
     var allPageHashes = <String>[];
-    var isThereADate = <
-        String>[]; // can be multiple because date does not create bundle > date automaticly creates bundle!!
     for (var g in bundleAnchorMap.value) {
       allPageHashes.add(g.pageHashcode);
-      if (g.pageDate != null) {
-        isThereADate.add(g.pageDate!);
-      }
     }
     var bundleHash = allPageHashes.toString(); // create a combined hash somehow
 
+    String? isThereADate;
+    for (var g in bundleAnchorMap.value) {
+      if (g.pageDate != null) {
+        isThereADate = g.pageDate; // decide on a date to use if multiple
+      }
+    }
+    // get date String form millisecondsSinceEpoch
+    var date = isThereADate ?? bundleAnchorMap.key.last.toString();
+
     listOfBundleDirectories.add(BundleDirectory(date, bundleHash));
+  }
+
+  for (var bundleDirectory in listOfBundleDirectories) {
+    bundleDirectory.toDirectory('rootPath');
+  }
+
+  for (var bundleAnchorMap in sortedByBundleAnchor.entries) {
+    for (var g in bundleAnchorMap.value) {
+      g.pageDirectory = g.pageDirectory.renameSync(newPath);
+    }
   }
 }
 
@@ -65,6 +79,11 @@ class BundleDirectory {
   final String date;
   final String hash;
   BundleDirectory(this.date, this.hash);
+
+  toDirectory(String rootPath) {
+    Directory(rootPath + 'Bundle_' + date + '_hash').createSync();
+    // automaticaly only creates if it does not exist
+  }
 }
 
 class Id {
