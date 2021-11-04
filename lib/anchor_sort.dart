@@ -10,13 +10,13 @@ import 'dart:io';
 /// You put a list of all objects (that have an anchor) into it and it spits out
 /// a sorted list of all these objects.
 
-class Anchor {
+abstract class Anchor {
   static const anchorFileName = '.anchor.csv';
 
   var _anchor = <int>[DateTime.now().millisecondsSinceEpoch];
 
-  @protected
-  void resetAnchor() => _anchor = [DateTime.now().millisecondsSinceEpoch];
+  // @protected
+  // void resetAnchor() => _anchor = [DateTime.now().millisecondsSinceEpoch];
 
   @protected
   List<int> get anchor => _anchor;

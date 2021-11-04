@@ -14,82 +14,84 @@ class Spacer extends ListItem {
   Spacer();
 }
 
-class BundleDirObject with Anchor {
-  static const _root = 'test/test_dir_1/Bundles/';
-  static const _addOn = 'Bundle_';
-  String get _date => _dir.name.substring(_addOn.length, _addOn.length + 10);
-  String get _uniqueKey => DateTime.now().millisecondsSinceEpoch.toString();
-  String _path(String date) => _root + _addOn + date + '_' + _uniqueKey;
+// class BundleDirObject with Anchor {
+//   static const _root = 'test/test_dir_1/Bundles/';
+//   static const _addOn = 'Bundle_';
+//   String get _date => _dir.name.substring(_addOn.length, _addOn.length + 10);
+//   String get _uniqueKey => DateTime.now().millisecondsSinceEpoch.toString();
+//   String _path(String date) => _root + _addOn + date + '_' + _uniqueKey;
 
-  late Directory _dir;
+//   late Directory _dir;
 
-  // Directory get directory => _dir;
-  // List<int> get bundleAnchor => anchor;
+//   // Directory get directory => _dir;
+//   // List<int> get bundleAnchor => anchor;
 
-  BundleDirObject.formDirectory(this._dir) {
-    // maybe add a check if _dir is valid
-    anchorFromDir(_dir);
-  }
+//   BundleDirObject.formDirectory(this._dir) {
+//     // maybe add a check if _dir is valid
+//     anchorFromDir(_dir);
+//   }
 
-  BundleDirObject.createNew() {
-    var date = DateTime.now().toString().substring(0, 10);
-    _dir = Directory(_path(date))..createSync();
-    anchorToDir(_dir);
-  }
+//   BundleDirObject.createNew() {
+//     var date = DateTime.now().toString().substring(0, 10);
+//     _dir = Directory(_path(date))..createSync();
+//     anchorToDir(_dir);
+//   }
 
-  BundleDirObject.createBelow(BundleDirObject otherBundle) {
-    _dir = Directory(_path(otherBundle._date))..createSync();
-    linkAnchor(otherBundle);
-    anchorToDir(_dir);
-  }
+//   BundleDirObject.createBelow(BundleDirObject otherBundle) {
+//     _dir = Directory(_path(otherBundle._date))..createSync();
+//     linkAnchor(otherBundle);
+//     anchorToDir(_dir);
+//   }
 
-  void moveTop() {
-    var date = DateTime.now().toString().substring(0, 10);
-    _dir = _dir.renameSync(_path(date))..createSync();
-    resetAnchor();
-    anchorToDir(_dir);
-  }
+//   void moveTop() {
+//     var date = DateTime.now().toString().substring(0, 10);
+//     _dir = _dir.renameSync(_path(date))..createSync();
+//     resetAnchor();
+//     anchorToDir(_dir);
+//   }
 
-  void moveBelow(BundleDirObject otherBundle) {
-    _dir = _dir.renameSync(_path(otherBundle._date));
-    linkAnchor(otherBundle);
-    anchorToDir(_dir);
-  }
-}
+//   void moveBelow(BundleDirObject otherBundle) {
+//     _dir = _dir.renameSync(_path(otherBundle._date));
+//     linkAnchor(otherBundle);
+//     anchorToDir(_dir);
+//   }
+// }
 
-// this is basically a Directory() that has an anchor
-class PageDirectorye with Anchor {
-  static const addOn = 'Page_';
-  String get uniqueKey => DateTime.now().millisecondsSinceEpoch.toString();
-  String get name => addOn + uniqueKey;
+// // this is basically a Directory() that has an anchor
+// class PageDirectorye with Anchor {
+//   static const addOn = 'Page_';
+//   String get uniqueKey => DateTime.now().millisecondsSinceEpoch.toString();
+//   String get name => addOn + uniqueKey;
 
-  String _path;
-  PageDirectorye(this._path);
+//   String _path;
+//   PageDirectorye(this._path);
 
-  Directory get _rawDir => Directory(path);
-  String get path => _path;
-  Directory get parent => _rawDir.parent;
+//   Directory get _rawDir => Directory(path);
+//   String get path => _path;
+//   Directory get parent => _rawDir.parent;
 
-  void createSync({bool recursive = false}) {
-    _rawDir.createSync(recursive: recursive);
-    anchorToDir(_rawDir);
-  }
+//   void createSync({bool recursive = false}) {
+//     _rawDir.createSync(recursive: recursive);
+//     anchorToDir(_rawDir);
+//   }
 
-  void linkPageDirectory(PageDirectorye other) {
-    _rawDir.renameSync(other.path);
-    _path = other.path;
-    linkAnchor(other);
-    anchorToDir(_rawDir);
-  }
+//   void linkPageDirectory(PageDirectorye other) {
+//     _rawDir.renameSync(other.path);
+//     _path = other.path;
+//     linkAnchor(other);
+//     anchorToDir(_rawDir);
+//   }
 
-  void renameSync(String newPath) {
-    _rawDir.renameSync(newPath);
-  }
-}
+//   void renameSync(String newPath) {
+//     _rawDir.renameSync(newPath);
+//   }
+// }
 
 /// This is basically a Directory with an Anchor.
+/// When instaciated it creates an anchor and holds a path.
+/// When created form a existing Directory it adapts the existing anchor.
 abstract class TGTBDirectory<E extends TGTBDirectory<E>> with Anchor {
-  String _path;
+  late String _path;
   TGTBDirectory(this._path);
 
   String get path => _path;
@@ -101,7 +103,7 @@ abstract class TGTBDirectory<E extends TGTBDirectory<E>> with Anchor {
     anchorToDir(newDir);
   }
 
-  /// Linkes the TGTBDirectory to an other TGTBDirectory of the same Type.
+  /// Linkes this TGTBDirectory to an other TGTBDirectory of the same Type.
   void linkDirectory(E other);
 
   /// Renames this TGTBDirectory.
@@ -109,6 +111,11 @@ abstract class TGTBDirectory<E extends TGTBDirectory<E>> with Anchor {
     var newDir = Directory(_path).renameSync(newPath);
     _path = newPath;
     return newDir;
+  }
+
+  TGTBDirectory.fromDirectory(Directory dir) {
+    _path = dir.path;
+    anchorFromDir(dir);
   }
 }
 
@@ -133,7 +140,7 @@ class PageDirectory extends TGTBDirectory<PageDirectory> {
     anchorToDir(newDir);
   }
 
-  PageDirectory.fromDirectory(Directory dir) : super(dir.path);
+  PageDirectory.fromDirectory(Directory dir) : super.fromDirectory(dir);
 }
 
 /// If the user creates a [Bundle] a BundleDirectory is created.
@@ -160,7 +167,7 @@ class BundleDirectory extends TGTBDirectory<BundleDirectory> {
     anchorToDir(newDir);
   }
 
-  BundleDirectory.formDirectory(Directory dir) : super(dir.path);
+  BundleDirectory.formDirectory(Directory dir) : super.fromDirectory(dir);
 }
 
 some() {
