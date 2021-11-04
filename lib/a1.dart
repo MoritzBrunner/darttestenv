@@ -58,143 +58,228 @@ class BundleDirObject with Anchor {
 }
 
 // this is basically a Directory() that has an anchor
-class PageDirectory with Anchor {
-  String path;
-  PageDirectory(this.path);
+class PageDirectorye with Anchor {
+  static const addOn = 'Page_';
+  String get uniqueKey => DateTime.now().millisecondsSinceEpoch.toString();
+  String get name => addOn + uniqueKey;
+
+  String _path;
+  PageDirectorye(this._path);
+
+  Directory get _rawDir => Directory(path);
+  String get path => _path;
+  Directory get parent => _rawDir.parent;
 
   void createSync({bool recursive = false}) {
-    var dir = Directory(path)..createSync(recursive: recursive);
-    anchorToDir(dir);
+    _rawDir.createSync(recursive: recursive);
+    anchorToDir(_rawDir);
   }
 
-  void linkPageDirectory(PageDirectory other) {
-    Directory(path).renameSync(other.path);
-    path = other.path;
+  void linkPageDirectory(PageDirectorye other) {
+    _rawDir.renameSync(other.path);
+    _path = other.path;
     linkAnchor(other);
-    anchorToDir(dir);
+    anchorToDir(_rawDir);
   }
 
   void renameSync(String newPath) {
-    Directory(path).renameSync(newPath);
+    _rawDir.renameSync(newPath);
   }
 }
 
+/// This is basically a Directory with an Anchor.
+abstract class TGTBDirectory<E extends TGTBDirectory<E>> with Anchor {
+  String _path;
+  TGTBDirectory(this._path);
+
+  String get path => _path;
+  Directory get parent => Directory(_path).parent;
+
+  void createSync({bool recursive = false}) {
+    var newDir = Directory(_path);
+    newDir.createSync(recursive: recursive);
+    anchorToDir(newDir);
+  }
+
+  /// Linkes the TGTBDirectory to an other TGTBDirectory of the same Type.
+  void linkDirectory(E other);
+
+  /// Renames this TGTBDirectory.
+  Directory _renameSync(String newPath) {
+    var newDir = Directory(_path).renameSync(newPath);
+    _path = newPath;
+    return newDir;
+  }
+}
+
+/// If the user creates a [Page] a PageDirectory is created.
+/// The contents of the Page are stored in files insde this Directory.
+///
+/// PageDirectories are located in [BundleDirectory]s.
+class PageDirectory extends TGTBDirectory<PageDirectory> {
+  // PageDirectories have a fixed naming convention
+  static const addOn = 'Page_';
+  static String uniqueKey() => DateTime.now().millisecondsSinceEpoch.toString();
+  static String get name => addOn + uniqueKey();
+
+  // PageDirectories can only be created in BundleDirectories
+  PageDirectory(BundleDirectory bundle) : super(bundle.path + '/' + name);
+
+  @override
+  void linkDirectory(PageDirectory other) {
+    var newPath = other.parent.path + '/' + name;
+    var newDir = _renameSync(newPath);
+    linkAnchor(other);
+    anchorToDir(newDir);
+  }
+
+  PageDirectory.fromDirectory(Directory dir) : super(dir.path);
+}
+
+/// If the user creates a [Bundle] a BundleDirectory is created.
+/// [PageDirectory]s are stored insde BundleDirectories.
+class BundleDirectory extends TGTBDirectory<BundleDirectory> {
+  // BundleDirectories have a fixed naming convention
+  static const addOn = 'Bundle_';
+  static String currentDate() => DateTime.now().toString().substring(0, 10);
+  static String uniqueKey() => DateTime.now().millisecondsSinceEpoch.toString();
+  static String name(String date) => addOn + date + '_' + uniqueKey();
+
+  String _date = currentDate();
+  String get date => _date;
+
+  BundleDirectory(String path) : super(path + '/' + name(currentDate()));
+
+  @override
+  void linkDirectory(BundleDirectory other) {
+    // Date is copied so they appear in the same spot in a FileExplorer
+    _date = other.date;
+    var newPath = other.parent.path + '/' + name(other.date);
+    var newDir = _renameSync(newPath);
+    linkAnchor(other);
+    anchorToDir(newDir);
+  }
+
+  BundleDirectory.formDirectory(Directory dir) : super(dir.path);
+}
+
 some() {
-  Directory('').renameSync(newPath);
+  var a = BundleDirectory('');
+  PageDirectory(a).createSync();
 }
 
 /// This is the programaticaly representation of a PageFolder.
 /// It holds the Directory(path) to the FileSystemObject as well as
 /// the Anchor that is stored in that FileSystemObject.
 /// This is basicaly an advanced version of a Directory()
-class PageDirObject extends ListItem with Anchor {
-  static const _addOn = 'Page_';
-  String get _uniqueKey => DateTime.now().millisecondsSinceEpoch.toString();
-  String get _name => _addOn + _uniqueKey;
+// class PageDirObject extends ListItem with Anchor {
+//   static const _addOn = 'Page_';
+//   String get _uniqueKey => DateTime.now().millisecondsSinceEpoch.toString();
+//   String get _name => _addOn + _uniqueKey;
 
-  late Directory _dir;
-  Directory get directory => _dir;
-  // List<int> get pageAnchor => anchor;
-  // TGTBBundleDirectory get bundle =>
-  //     TGTBBundleDirectory.formDirectory(_dir.parent);
+//   late Directory _dir;
+//   Directory get directory => _dir;
+//   // List<int> get pageAnchor => anchor;
+//   // TGTBBundleDirectory get bundle =>
+//   //     TGTBBundleDirectory.formDirectory(_dir.parent);
 
-  PageDirObject.fromDirectory(this._dir) {
-    anchorFromDir(_dir);
-  }
+//   PageDirObject.fromDirectory(this._dir) {
+//     anchorFromDir(_dir);
+//   }
 
-  // TGTBPageDirectory.createNew(Directory bundle) {
-  //   var path = bundle.path + '/' + _name;
-  //   _dir = Directory(path)..createSync();
-  //   anchorToDir(_dir);
-  // }
+//   // TGTBPageDirectory.createNew(Directory bundle) {
+//   //   var path = bundle.path + '/' + _name;
+//   //   _dir = Directory(path)..createSync();
+//   //   anchorToDir(_dir);
+//   // }
 
-  PageDirObject.createBelow2(PageDirObject pageDirObject) {
-    // you get this from index+1
-    var path = pageDirObject.directory.parent.path + '/' + _name;
-    // here it might be sinnvoll to make a getter to get the parent directory but it would not save much words
-    // the whole directory object is not needed
-    _dir = Directory(path)..createSync();
-    linkAnchor(pageDirObject);
-    anchorToDir(_dir);
-  }
-  PageDirObject.createBelow(Directory bundle, List<int> anchor) {
-    var bundle = otherPage.bundle;
-    var path = bundle.directory.path + '/' + _name;
-    _dir = Directory(path)..createSync();
-    linkAnchor(otherPage);
-    anchorToDir(_dir);
-  }
-  void moveTopOfBundle(BundleDirObject bundle) {
-    var path = bundle.directory.path + '/' + _name;
-    _dir = _dir.renameSync(path);
-    resetAnchor();
-    anchorToDir(_dir);
-  }
+//   PageDirObject.createBelow2(PageDirObject pageDirObject) {
+//     // you get this from index+1
+//     var path = pageDirObject.directory.parent.path + '/' + _name;
+//     // here it might be sinnvoll to make a getter to get the parent directory but it would not save much words
+//     // the whole directory object is not needed
+//     _dir = Directory(path)..createSync();
+//     linkAnchor(pageDirObject);
+//     anchorToDir(_dir);
+//   }
+//   PageDirObject.createBelow(Directory bundle, List<int> anchor) {
+//     var bundle = otherPage.bundle;
+//     var path = bundle.directory.path + '/' + _name;
+//     _dir = Directory(path)..createSync();
+//     linkAnchor(otherPage);
+//     anchorToDir(_dir);
+//   }
+//   void moveTopOfBundle(BundleDirObject bundle) {
+//     var path = bundle.directory.path + '/' + _name;
+//     _dir = _dir.renameSync(path);
+//     resetAnchor();
+//     anchorToDir(_dir);
+//   }
 
-  void moveBelow(PageDirObject otherPage) {
-    var newBundle = otherPage.directory.parent;
-    var newPath = newBundle.path + '/' + _name;
-    _dir = _dir.renameSync(newPath);
-    linkAnchor(otherPage);
-    anchorToDir(_dir);
-  }
+//   void moveBelow(PageDirObject otherPage) {
+//     var newBundle = otherPage.directory.parent;
+//     var newPath = newBundle.path + '/' + _name;
+//     _dir = _dir.renameSync(newPath);
+//     linkAnchor(otherPage);
+//     anchorToDir(_dir);
+//   }
 
-  move(ListItem item) {
-    if (item is Spacer) {
-      resetAnchor();
-    } else if (item is PageDirObject) {
-      var newBundle = item.directory.parent;
-      var newPath = newBundle.path + '/' + _name;
-      _dir = _dir.renameSync(newPath);
-      linkAnchor(item);
-    }
-    anchorToDir(_dir);
-  }
+//   move(ListItem item) {
+//     if (item is Spacer) {
+//       resetAnchor();
+//     } else if (item is PageDirObject) {
+//       var newBundle = item.directory.parent;
+//       var newPath = newBundle.path + '/' + _name;
+//       _dir = _dir.renameSync(newPath);
+//       linkAnchor(item);
+//     }
+//     anchorToDir(_dir);
+//   }
 
-  void mvBlew(PageDirObject otherPage) {
-    moveToDir(otherPage.directory.parent);
-    linkToOtherPage(otherPage);
-  }
+//   void mvBlew(PageDirObject otherPage) {
+//     moveToDir(otherPage.directory.parent);
+//     linkToOtherPage(otherPage);
+//   }
 
-  void moveToDir(Directory dir) {
-    var newPath = dir.path + '/' + _name;
-    _dir = _dir.renameSync(newPath);
-  }
+//   void moveToDir(Directory dir) {
+//     var newPath = dir.path + '/' + _name;
+//     _dir = _dir.renameSync(newPath);
+//   }
 
-  void rstnch() {
-    resetAnchor();
-    anchorToDir(_dir);
-  }
+//   void rstnch() {
+//     resetAnchor();
+//     anchorToDir(_dir);
+//   }
 
-  void linkToOtherPage(PageDirObject otherPage) {
-    linkAnchor(otherPage);
-    anchorToDir(_dir);
-  }
-}
+//   void linkToOtherPage(PageDirObject otherPage) {
+//     linkAnchor(otherPage);
+//     anchorToDir(_dir);
+//   }
+// }
 
-class Page {
-  String content;
-  Page(this.content);
-}
+// class Page {
+//   String content;
+//   Page(this.content);
+// }
 
-class Entry {
-  static const fileName = 'entry.txt';
-  late String content;
+// class Entry {
+//   static const fileName = 'entry.txt';
+//   late String content;
 
-  Entry.fromDirectory(Directory dir) {
-    var path = dir.path + '/' + fileName;
-    content = File(path).readAsStringSync();
-  }
+//   Entry.fromDirectory(Directory dir) {
+//     var path = dir.path + '/' + fileName;
+//     content = File(path).readAsStringSync();
+//   }
 
-  void edit(String newText) {
-    content = newText;
-  }
+//   void edit(String newText) {
+//     content = newText;
+//   }
 
-  void toDirectory(Directory dir) {
-    var path = dir.path + '/' + fileName;
-    File(path).writeAsStringSync(content);
-  }
-}
+//   void toDirectory(Directory dir) {
+//     var path = dir.path + '/' + fileName;
+//     File(path).writeAsStringSync(content);
+//   }
+// }
 
 ///
 /// Input:

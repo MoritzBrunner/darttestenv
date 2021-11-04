@@ -35,7 +35,7 @@ class TGTBBundle2 with Anchor {
   void moveTo(TGTBBundle2 otherBundle) {
     _date = otherBundle.date;
     _uniqueKey = DateTime.now().millisecondsSinceEpoch.toString();
-    linkTo(otherBundle);
+    linkAnchor(otherBundle);
   }
 }
 
@@ -63,6 +63,6 @@ class TGTBBundle with Anchor {
 
   void moveTo(TGTBBundle otherBundle) {
     _dir = _dir.renameSync(_path(otherBundle._date));
-    linkTo(otherBundle);
+    linkAnchor(otherBundle);
   }
 }

@@ -20,6 +20,12 @@ void main() {
     l.forEach((e) => print(e.i));
   });
   test('test 2', () {
-    TGTBBundleDirectory.createNew();
+    var a = BundleDirectory('test/test_dir_1/Bundles');
+    sleep(Duration(milliseconds: 250));
+    var b = BundleDirectory('test/test_dir_1/Bundles');
+    print(b.datee);
+    print(a.datee);
+    print(b.path);
+    print(a.path);
   });
 }
