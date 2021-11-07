@@ -1,6 +1,27 @@
 import 'dart:convert';
 import 'dart:io';
 
+/// allright:
+/// Pages contain:
+/// - bundle anchor
+///   app starts, list all existing bundles and attach all corresponding pages to them
+///   sort the bundles and all bundle folders will be created (yes every time the app starts we create folders and delete empty ones (well that seams expensive and what problem does it fix? so everyting is based on pages, jeah but for what, people are as happy if they can move their bundles they dont need to move individual pages thats why they bundled them in the first place))
+///
+/// - page anchor
+///   this is how the pages are sorted inside bundle
+/// - hashCode
+///   created from the page content + anchor every time the page is eddited (in app, when you edit it in folder i cant do shit exept recreate all fucking hashcodes of all pages whenever the app starts just to correct that one shit youve done, and needles to say that creates a lot of 99.99% unnecessary computation and app startup time (maybe) to only haphasardly fix an uncommon problem)
+///   this hashcode will be attached to the directory name so that
+///
+
+///
+/// People are..
+/// - allowed to move bunldes to backup and back in.
+/// - allowed tinker with pages inside bundle. (hash is out)
+/// - not allowed to move pages from bundles.
+///   pro: pages do not need millisecond anchors (optential other problems?) which allows easy multy creation
+///   con: what happens if people do it
+
 class TgtbHashCode {
   TgtbHashCode();
 }
@@ -107,17 +128,18 @@ class Id {
         'date': date,
       };
 }
+
 ///
 /// # PageDirectory
 /// Page_"PageHashCode"
 /// entry.json
 /// .id.json
-/// 
-/// 
+///
+///
 /// # TgtbID
 /// .tgtbID.Json
 ///   pageAnchor: [],
 ///   bundleAnchor: [],
 ///   pageHashCode: ""
 ///   date: "yyyy-mm-dd" // null if not set by user
-/// 
+///
